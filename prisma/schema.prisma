@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Department {
+  Id             Int       @id(map: "PK__Departme__3214EC0708605120") @default(autoincrement())
+  Name           String    @db.VarChar(100)
+  Code           String    @db.VarChar(20)
+  IsMarkToDelete Boolean?  @default(false, map: "DF__Departmen__IsMar__4BAC3F29")
+  CreatedAt      DateTime? @default(now(), map: "DF__Departmen__Creat__4CA06362") @db.DateTime
+  UpdatedAt      DateTime? @db.DateTime
+  Users          Users[]
+}
+
+model Roles {
+  Id    Int     @id(map: "PK__Roles__3214EC07267BDF4B")
+  Name  String? @db.VarChar(1)
+  Users Users[]
+}
+
+model Users {
+  Id             Int        @id(map: "PK__Users__3214EC079EAEC33A") @default(autoincrement())
+  RoleId         Int
+  Name           String     @db.VarChar(100)
+  Email          String     @unique(map: "UQ__Users__A9D1053462A07135") @db.VarChar(150)
+  UvId           Int?
+  Password       String     @db.VarChar(Max)
+  DepartmentId   Int
+  IsMarkToDelete Boolean?   @default(false, map: "DF__Users__IsMarkToD__5070F446")
+  CreatedAt      DateTime?  @default(now(), map: "DF__Users__CreatedAt__5165187F") @db.DateTime
+  UpdatedAt      DateTime?  @db.DateTime
+  Department     Department @relation(fields: [DepartmentId], references: [Id], onUpdate: NoAction, map: "FK_Users_Department")
+  Roles          Roles      @relation(fields: [RoleId], references: [Id], onUpdate: NoAction, map: "FK_Users_Roles")
+}
+model UserSessions {
+  Id             String    @id(map: "PK__UserSess__3214EC07018A5C07") @db.NVarChar(36)
+  UserId         String    @db.NVarChar(36)
+  RefreshtokenId String    @unique(map: "UQ__UserSess__F147A8DFE4704B58") @db.NVarChar(36)
+  IsActive       Boolean?  @default(false, map: "DF__UserSessi__IsAct__70DDC3D8")
+  CreatedDate    DateTime? @default(now(), map: "DF__UserSessi__Creat__71D1E811") @db.DateTime
+}
