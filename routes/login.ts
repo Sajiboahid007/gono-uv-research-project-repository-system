@@ -11,21 +11,20 @@ const router = express.Router();
 
 router.post("/login", async (req: Request, res: Response) => {
   try {
-    const { Password } = req?.body;
-    const StudentId = req?.body?.StudentId;
+    const { Password, StudentId } = req?.body;
     const user = await prisma.users.findFirst({
       where: { StudentId: StudentId },
     });
 
     if (!user) {
-      res.status(401).json({ error: "Invalid email or password" });
+      res.status(401).json({ error: "Invalid StudentId or password" });
       return;
     }
 
     const isMatch = await bcrypt.compare(Password, user.Password);
 
     if (!isMatch) {
-      res.status(401).json({ error: "Invalid email or password" });
+      res.status(401).json({ error: "Invalid StudentId or password" });
       return;
     }
 
@@ -129,7 +128,7 @@ function sendJwtToken(user: any, response: any, refreshToken: string) {
     //
     GRPConfig.JwtSecret,
     {
-      expiresIn: "1h", // "1h",
+      expiresIn: "7m", // "1h",
     },
   );
 

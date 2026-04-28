@@ -11,14 +11,16 @@ app.use(express.json());
 const loginRouter = require("./routes/login");
 const userRouter = require("./routes/user");
 const departmentRouter = require("./routes/department");
-const roleRouter = require("./routes/role");
+const roleRouter = require("./routes/roles");
 const batchesRouter = require("./routes/batches");
+const categoryRouter = require("./routes/category");
 
 app.use("/api", userRouter);
 app.use("/api", loginRouter);
 app.use("/api", departmentRouter);
 app.use("/api", roleRouter);
 app.use("/api", batchesRouter);
+app.use("/api", categoryRouter);
 
 const port = 3000;
 
