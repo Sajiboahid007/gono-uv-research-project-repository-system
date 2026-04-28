@@ -10,9 +10,13 @@ app.use(express.json());
 
 const loginRouter = require("./routes/login");
 const userRouter = require("./routes/user");
+const departmentRouter = require("./routes/department");
+const roleRouter = require("./routes/role");
 
 app.use("/api", userRouter);
 app.use("/api", loginRouter);
+app.use("/api", departmentRouter);
+app.use("/api", roleRouter);
 
 const port = 3000;
 

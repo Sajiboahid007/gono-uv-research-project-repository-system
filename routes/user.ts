@@ -7,10 +7,25 @@ const prisma = new PrismaClient();
 
 const router = express.Router();
 
-router.get("/users/get", async (req: Request, res: Response) => {
+router.get("/users/get", async (_req, res) => {
   try {
     const users = await prisma.users.findMany({
       where: {
+        IsMarkToDelete: false,
+      },
+    });
+    res.json({ users, message: "Users retrieved successfully" });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/users/getByDepartment/:departmentId", async (req, res) => {
+  try {
+    const departmentId = Number(req.params.departmentId);
+    const users = await prisma.users.findMany({
+      where: {
+        DepartmentId: departmentId,
         IsMarkToDelete: false,
       },
     });
@@ -59,7 +74,7 @@ router.post("/users/create", async (req: Request, res: Response) => {
 });
 
 router.put(
-  "users/update/:id",
+  "/users/update/:id",
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = Number(req.params.id);
@@ -95,7 +110,7 @@ router.put(
 );
 
 router.put(
-  "users/delete/:id",
+  "/users/delete/:id",
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = Number(req.params.id);

@@ -13,7 +13,7 @@ router.post("/login", async (req: Request, res: Response) => {
   try {
     const { Password } = req?.body;
     const UvId = Number(req?.body);
-    const user = await prisma.users.findUnique({
+    const user = await prisma.users.findFirst({
       include: { Roles: true },
       where: { UvId: UvId },
     });
