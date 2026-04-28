@@ -12,10 +12,9 @@ const router = express.Router();
 router.post("/login", async (req: Request, res: Response) => {
   try {
     const { Password } = req?.body;
-    const UvId = Number(req?.body);
+    const StudentId = req?.body?.StudentId;
     const user = await prisma.users.findFirst({
-      include: { Roles: true },
-      where: { UvId: UvId },
+      where: { StudentId: StudentId },
     });
 
     if (!user) {
@@ -66,7 +65,7 @@ async function refreshTokenForLogin(userId: number) {
   if (userId <= 0) {
     return null;
   }
-  console.log("here ", userId);
+
   const userSession = await prisma.userSessions.findFirst({
     where: {
       AND: [{ UserId: userId.toString() }, { IsActive: true }],
@@ -76,7 +75,6 @@ async function refreshTokenForLogin(userId: number) {
   const newToken = generateGUID();
 
   if (userSession) {
-    console.log("user session null");
     await prisma.userSessions.updateMany({
       data: {
         RefreshtokenId: newToken,
@@ -86,7 +84,6 @@ async function refreshTokenForLogin(userId: number) {
       },
     });
   } else {
-    console.log("user session creatrnm");
     await prisma.userSessions.create({
       data: {
         RefreshtokenId: newToken,

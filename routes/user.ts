@@ -53,14 +53,14 @@ router.get("/users/get/:id", async (req: Request, res: Response) => {
 
 router.post("/users/create", async (req: Request, res: Response) => {
   try {
-    const { RoleId, Name, Email, UvId, Password, DepartmentId } = req.body;
+    const { RoleId, Name, Email, StudentId, Password, DepartmentId } = req.body;
     const hashedPassword = await bcrypt.hash(Password, 10);
     const newUser = await prisma.users.create({
       data: {
         RoleId,
         Name,
         Email,
-        UvId,
+        StudentId,
         Password: hashedPassword,
         DepartmentId,
       },

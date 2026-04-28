@@ -12,11 +12,13 @@ const loginRouter = require("./routes/login");
 const userRouter = require("./routes/user");
 const departmentRouter = require("./routes/department");
 const roleRouter = require("./routes/role");
+const batchesRouter = require("./routes/batches");
 
 app.use("/api", userRouter);
 app.use("/api", loginRouter);
 app.use("/api", departmentRouter);
 app.use("/api", roleRouter);
+app.use("/api", batchesRouter);
 
 const port = 3000;
 
