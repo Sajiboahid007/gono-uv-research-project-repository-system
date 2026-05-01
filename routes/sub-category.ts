@@ -1,5 +1,7 @@
-import express from "express";
+import express, { Response } from "express";
 import { PrismaClient } from "@prisma/client";
+import { authenticate } from "../authenticate";
+import { AuthenticatedRequest } from "../interface";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -39,26 +41,30 @@ router.get("/subcategories/get/:id", async (req, res) => {
   }
 });
 
-router.post("/subcategories/create", async (req, res) => {
-  try {
-    const { Name, CategoryId, Code, CreatedBy } = req.body;
-    const category = await prisma.subCategory.create({
-      data: {
-        Name,
-        Code,
-        CreatedBy,
-        IsMarkToDelete: false,
-        CategoryId: Number(CategoryId),
-      },
-    });
-    res.json({
-      data: category,
-      message: "Sub Category created successfully",
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
+router.post(
+  "/subcategories/create",
+  authenticate,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { Name, CategoryId, Code } = req.body;
+      const category = await prisma.subCategory.create({
+        data: {
+          Name,
+          Code,
+          CreatedBy: req.userEmail || "Unknown",
+          IsMarkToDelete: false,
+          CategoryId: Number(CategoryId),
+        },
+      });
+      res.json({
+        data: category,
+        message: "Sub Category created successfully",
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+);
 
 router.put("/subcategories/update/:id", async (req, res) => {
   try {
