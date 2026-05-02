@@ -1,5 +1,8 @@
 import express = require("express");
 import cors = require("cors");
+import swaggerUi from "swagger-ui-express";
+import { openApiDocument } from "./swagger";
+
 const app = express();
 app.use(
   cors({
@@ -24,7 +27,12 @@ app.use("/api", batchesRouter);
 app.use("/api", categoryRouter);
 app.use("/api", subCategoryRouter);
 
-const port = 3000;
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
+app.get("/openapi.json", (_req, res) => {
+  res.json(openApiDocument);
+});
+
+const port = 1234;
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
