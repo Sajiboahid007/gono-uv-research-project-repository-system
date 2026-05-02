@@ -32,7 +32,7 @@ app.get("/openapi.json", (_req, res) => {
   res.json(openApiDocument);
 });
 
-const port = 1234;
+const port = 3000;
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
