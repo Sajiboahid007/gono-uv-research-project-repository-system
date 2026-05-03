@@ -6,40 +6,48 @@ import { AuthenticatedRequest } from "../interface";
 const prisma = new PrismaClient();
 const router = express.Router();
 
-router.get("/subcategories/get", async (_req, res) => {
-  try {
-    const categories = await prisma.subCategory.findMany({
-      where: {
-        IsMarkToDelete: false,
-      },
-    });
-    res.json({
-      data: categories,
-      message: "Sub Categories retrieved successfully",
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.get("/subcategories/get/:id", async (req, res) => {
-  try {
-    const subCategoryId = Number(req.params.id);
-    const category = await prisma.subCategory.findFirst({
-      where: { Id: subCategoryId, IsMarkToDelete: false },
-    });
-    if (!category) {
-      res.status(404).json({ error: "Sub Category not found" });
-      return;
+router.get(
+  "/subcategories/get",
+  authenticate,
+  async (_req: AuthenticatedRequest, res) => {
+    try {
+      const categories = await prisma.subCategory.findMany({
+        where: {
+          IsMarkToDelete: false,
+        },
+      });
+      res.json({
+        data: categories,
+        message: "Sub Categories retrieved successfully",
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
-    res.json({
-      data: category,
-      message: "Sub Category retrieved successfully",
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
+  },
+);
+
+router.get(
+  "/subcategories/get/:id",
+  authenticate,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const subCategoryId = Number(req.params.id);
+      const category = await prisma.subCategory.findFirst({
+        where: { Id: subCategoryId, IsMarkToDelete: false },
+      });
+      if (!category) {
+        res.status(404).json({ error: "Sub Category not found" });
+        return;
+      }
+      res.json({
+        data: category,
+        message: "Sub Category retrieved successfully",
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+);
 
 router.post(
   "/subcategories/create",
@@ -66,50 +74,58 @@ router.post(
   },
 );
 
-router.put("/subcategories/update/:id", async (req, res) => {
-  try {
-    const subCategoryId = Number(req.params.id);
-    const { Name, CategoryId, Code } = req.body;
-    const updatedCategory = await prisma.subCategory.update({
-      where: { Id: subCategoryId },
-      data: {
-        Name,
-        Code,
-        CategoryId: Number(CategoryId),
-      },
-    });
-    res.json({
-      data: updatedCategory,
-      message: "Sub Category updated successfully",
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.put("/subcategories/delete/:id", async (req, res) => {
-  try {
-    const subcCategoryId = Number(req.params.id);
-    const category = await prisma.subCategory.findFirst({
-      where: { Id: subcCategoryId, IsMarkToDelete: false },
-    });
-    if (!category) {
-      res.status(404).json({ error: "Sub Category not found" });
-      return;
+router.put(
+  "/subcategories/update/:id",
+  authenticate,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const subCategoryId = Number(req.params.id);
+      const { Name, CategoryId, Code } = req.body;
+      const updatedCategory = await prisma.subCategory.update({
+        where: { Id: subCategoryId },
+        data: {
+          Name,
+          Code,
+          CategoryId: Number(CategoryId),
+        },
+      });
+      res.json({
+        data: updatedCategory,
+        message: "Sub Category updated successfully",
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
-    const updatedCategory = await prisma.subCategory.update({
-      where: { Id: subcCategoryId },
-      data: {
-        IsMarkToDelete: true,
-      },
-    });
-    res.json({
-      data: updatedCategory,
-      message: "Sub Category deleted successfully",
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
+  },
+);
+
+router.put(
+  "/subcategories/delete/:id",
+  authenticate,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const subcCategoryId = Number(req.params.id);
+      const category = await prisma.subCategory.findFirst({
+        where: { Id: subcCategoryId, IsMarkToDelete: false },
+      });
+      if (!category) {
+        res.status(404).json({ error: "Sub Category not found" });
+        return;
+      }
+      const updatedCategory = await prisma.subCategory.update({
+        where: { Id: subcCategoryId },
+        data: {
+          IsMarkToDelete: true,
+        },
+      });
+      res.json({
+        data: updatedCategory,
+        message: "Sub Category deleted successfully",
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+);
 
 module.exports = router;

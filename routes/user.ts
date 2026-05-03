@@ -14,7 +14,7 @@ router.get("/users/get", async (_req, res) => {
         IsMarkToDelete: false,
       },
     });
-    res.json({ users, message: "Users retrieved successfully" });
+    res.json({ data: users, message: "Users retrieved successfully" });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -29,7 +29,7 @@ router.get("/users/getByDepartment/:departmentId", async (req, res) => {
         IsMarkToDelete: false,
       },
     });
-    res.json({ users, message: "Users retrieved successfully" });
+    res.json({ data: users, message: "Users retrieved successfully" });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -45,7 +45,7 @@ router.get("/users/get/:id", async (req: Request, res: Response) => {
       res.status(404).json({ error: "User not found" });
       return;
     }
-    res.json({ user, message: "User retrieved successfully" });
+    res.json({ data: user, message: "User retrieved successfully" });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -67,7 +67,7 @@ router.post("/users/create", async (req: Request, res: Response) => {
     });
     res
       .status(201)
-      .json({ user: newUser, message: "User created successfully" });
+      .json({ data: newUser, message: "User created successfully" });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -98,7 +98,7 @@ router.put(
         },
       });
       return res.status(201).json({
-        user: update,
+        data: update,
         message: "User updated successfully",
       });
     } catch (error: any) {
