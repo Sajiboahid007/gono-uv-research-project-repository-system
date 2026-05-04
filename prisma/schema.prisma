@@ -25,7 +25,7 @@ model Roles {
 model Users {
   Id             Int       @id(map: "PK__Users__3214EC073D9CAFDD") @default(autoincrement())
   Name           String    @db.VarChar(100)
-  Email          String    @db.VarChar(150)
+  Email String @unique @db.VarChar(150)
   StudentId      String    @db.VarChar(150)
   Password       String    @db.VarChar(Max)
   DepartmentId   Int

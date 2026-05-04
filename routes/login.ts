@@ -11,20 +11,20 @@ const router = express.Router();
 
 router.post("/login", async (req: Request, res: Response) => {
   try {
-    const { Password, StudentId } = req?.body;
+    const { Password, Email } = req?.body;
     const user = await prisma.users.findFirst({
-      where: { StudentId: StudentId },
+      where: { Email: Email },
     });
 
     if (!user) {
-      res.status(401).json({ error: "Invalid StudentId or password" });
+      res.status(401).json({ error: "Invalid Email or password" });
       return;
     }
 
     const isMatch = await bcrypt.compare(Password, user.Password);
 
     if (!isMatch) {
-      res.status(401).json({ error: "Invalid StudentId or password" });
+      res.status(401).json({ error: "Invalid Email or password" });
       return;
     }
 
@@ -74,7 +74,10 @@ async function refreshTokenForLogin(userId: number) {
   const newToken = generateGUID();
 
   if (userSession) {
-    await prisma.userSessions.updateMany({
+    await prisma.userSessions.update({
+      where: {
+        Id: userSession.Id,
+      },
       data: {
         RefreshtokenId: newToken,
         IsActive: true,
@@ -95,6 +98,48 @@ async function refreshTokenForLogin(userId: number) {
   }
   return { UserId: userId.toString(), RefreshToken: newToken };
 }
+
+// async function refreshTokenForLogin(userId: number) {
+//   if (!userId || userId <= 0) {
+//     return null;
+//   }
+
+//   const newToken = generateGUID();
+
+//   const userSession = await prisma.userSessions.findFirst({
+//     where: {
+//       UserId: userId.toString(),
+//       IsActive: true,
+//     },
+//   });
+
+//   if (userSession) {
+//     await prisma.userSessions.update({
+//       where: {
+//         Id: userSession.Id, // MUST be unique field
+//       },
+//       data: {
+//         RefreshtokenId: newToken,
+//         IsActive: true,
+//         CreatedDate: new Date(),
+//       },
+//     });
+//   } else {
+//     await prisma.userSessions.create({
+//       data: {
+//         RefreshtokenId: newToken,
+//         CreatedDate: new Date(),
+//         UserId: userId.toString(),
+//         IsActive: true,
+//       },
+//     });
+//   }
+
+//   return {
+//     UserId: userId.toString(),
+//     RefreshToken: newToken,
+//   };
+// }
 
 async function refreshTokenForAlreadyExist(refreshToken: string) {
   const userSession = await prisma.userSessions.findFirst({

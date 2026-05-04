@@ -25,7 +25,8 @@ export const openApiDocument = {
         type: "http",
         scheme: "bearer",
         bearerFormat: "JWT",
-        description: "JWT from `POST /api/login` (use as: Authorization: Bearer <token>)",
+        description:
+          "JWT from `POST /api/login` (use as: Authorization: Bearer <token>)",
       },
     },
     schemas: {
@@ -35,9 +36,9 @@ export const openApiDocument = {
       },
       LoginRequest: {
         type: "object",
-        required: ["StudentId", "Password"],
+        required: ["Email", "Password"],
         properties: {
-          StudentId: { type: "string" },
+          Email: { type: "string" },
           Password: { type: "string" },
         },
       },
@@ -51,7 +52,14 @@ export const openApiDocument = {
       },
       CreateUserRequest: {
         type: "object",
-        required: ["RoleId", "Name", "Email", "StudentId", "Password", "DepartmentId"],
+        required: [
+          "RoleId",
+          "Name",
+          "Email",
+          "StudentId",
+          "Password",
+          "DepartmentId",
+        ],
         properties: {
           RoleId: { type: "integer" },
           Name: { type: "string" },
@@ -122,14 +130,18 @@ export const openApiDocument = {
         requestBody: {
           required: true,
           content: {
-            "application/json": { schema: { $ref: "#/components/schemas/LoginRequest" } },
+            "application/json": {
+              schema: { $ref: "#/components/schemas/LoginRequest" },
+            },
           },
         },
         responses: {
           "200": {
             description: "JWT and refresh token",
             content: {
-              "application/json": { schema: { $ref: "#/components/schemas/LoginResponse" } },
+              "application/json": {
+                schema: { $ref: "#/components/schemas/LoginResponse" },
+              },
             },
           },
           "401": { description: "Invalid credentials" },
@@ -153,7 +165,9 @@ export const openApiDocument = {
           "200": {
             description: "New tokens",
             content: {
-              "application/json": { schema: { $ref: "#/components/schemas/LoginResponse" } },
+              "application/json": {
+                schema: { $ref: "#/components/schemas/LoginResponse" },
+              },
             },
           },
           "404": { description: "Invalid refresh token" },
@@ -193,7 +207,12 @@ export const openApiDocument = {
         tags: ["Users"],
         summary: "Get user by id",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         responses: {
           "200": { description: "OK" },
@@ -225,7 +244,12 @@ export const openApiDocument = {
         tags: ["Users"],
         summary: "Update user",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         requestBody: {
           content: {
@@ -246,7 +270,12 @@ export const openApiDocument = {
         tags: ["Users"],
         summary: "Soft-delete user (mark for deletion)",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         responses: {
           "200": { description: "OK" },
@@ -270,7 +299,12 @@ export const openApiDocument = {
         tags: ["Departments"],
         summary: "Get department by id",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         responses: {
           "200": { description: "OK" },
@@ -285,7 +319,9 @@ export const openApiDocument = {
         summary: "Create department",
         requestBody: {
           content: {
-            "application/json": { schema: { $ref: "#/components/schemas/DepartmentBody" } },
+            "application/json": {
+              schema: { $ref: "#/components/schemas/DepartmentBody" },
+            },
           },
         },
         responses: {
@@ -299,11 +335,18 @@ export const openApiDocument = {
         tags: ["Departments"],
         summary: "Update department",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         requestBody: {
           content: {
-            "application/json": { schema: { $ref: "#/components/schemas/DepartmentBody" } },
+            "application/json": {
+              schema: { $ref: "#/components/schemas/DepartmentBody" },
+            },
           },
         },
         responses: {
@@ -317,7 +360,12 @@ export const openApiDocument = {
         tags: ["Departments"],
         summary: "Soft-delete department",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         responses: {
           "200": { description: "OK" },
@@ -340,7 +388,12 @@ export const openApiDocument = {
         tags: ["Roles"],
         summary: "Get role by id",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         responses: {
           "200": { description: "OK" },
@@ -355,7 +408,9 @@ export const openApiDocument = {
         summary: "Create role",
         requestBody: {
           content: {
-            "application/json": { schema: { $ref: "#/components/schemas/RoleBody" } },
+            "application/json": {
+              schema: { $ref: "#/components/schemas/RoleBody" },
+            },
           },
         },
         responses: {
@@ -369,11 +424,18 @@ export const openApiDocument = {
         tags: ["Roles"],
         summary: "Update role",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         requestBody: {
           content: {
-            "application/json": { schema: { $ref: "#/components/schemas/RoleBody" } },
+            "application/json": {
+              schema: { $ref: "#/components/schemas/RoleBody" },
+            },
           },
         },
         responses: {
@@ -387,7 +449,12 @@ export const openApiDocument = {
         tags: ["Roles"],
         summary: "Delete role",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         responses: {
           "200": { description: "OK" },
@@ -428,7 +495,12 @@ export const openApiDocument = {
         tags: ["Batches"],
         summary: "Get batch by id",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         responses: {
           "200": { description: "OK" },
@@ -443,7 +515,9 @@ export const openApiDocument = {
         summary: "Create batch",
         requestBody: {
           content: {
-            "application/json": { schema: { $ref: "#/components/schemas/BatchBody" } },
+            "application/json": {
+              schema: { $ref: "#/components/schemas/BatchBody" },
+            },
           },
         },
         responses: {
@@ -457,11 +531,18 @@ export const openApiDocument = {
         tags: ["Batches"],
         summary: "Update batch",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         requestBody: {
           content: {
-            "application/json": { schema: { $ref: "#/components/schemas/BatchBody" } },
+            "application/json": {
+              schema: { $ref: "#/components/schemas/BatchBody" },
+            },
           },
         },
         responses: {
@@ -475,7 +556,12 @@ export const openApiDocument = {
         tags: ["Batches"],
         summary: "Soft-delete batch",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         responses: {
           "200": { description: "OK" },
@@ -498,7 +584,12 @@ export const openApiDocument = {
         tags: ["Categories"],
         summary: "Get category by id",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         responses: {
           "200": { description: "OK" },
@@ -513,7 +604,9 @@ export const openApiDocument = {
         summary: "Create category",
         requestBody: {
           content: {
-            "application/json": { schema: { $ref: "#/components/schemas/CategoryBody" } },
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CategoryBody" },
+            },
           },
         },
         responses: {
@@ -527,11 +620,18 @@ export const openApiDocument = {
         tags: ["Categories"],
         summary: "Update category",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         requestBody: {
           content: {
-            "application/json": { schema: { $ref: "#/components/schemas/CategoryBody" } },
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CategoryBody" },
+            },
           },
         },
         responses: {
@@ -546,7 +646,12 @@ export const openApiDocument = {
         tags: ["Categories"],
         summary: "Soft-delete category",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         responses: {
           "200": { description: "OK" },
@@ -570,7 +675,12 @@ export const openApiDocument = {
         tags: ["Subcategories"],
         summary: "Get subcategory by id",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         responses: {
           "200": { description: "OK" },
@@ -604,7 +714,12 @@ export const openApiDocument = {
         tags: ["Subcategories"],
         summary: "Update subcategory",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         requestBody: {
           content: {
@@ -624,7 +739,12 @@ export const openApiDocument = {
         tags: ["Subcategories"],
         summary: "Soft-delete subcategory",
         parameters: [
-          { name: "id", in: "path", required: true, schema: { type: "integer" } },
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
         ],
         responses: {
           "200": { description: "OK" },
