@@ -14,7 +14,10 @@ router.get("/departments/get", async (_, res) => {
         IsMarkToDelete: false,
       },
     });
-    res.json({ departments, message: "Departments retrieved successfully" });
+    res.json({
+      data: departments,
+      message: "Departments retrieved successfully",
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -30,7 +33,10 @@ router.get("/departments/get/:id", async (req, res) => {
       res.status(404).json({ error: "Department not found" });
       return;
     }
-    res.json({ department, message: "Department retrieved successfully" });
+    res.json({
+      data: department,
+      message: "Department retrieved successfully",
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -49,7 +55,7 @@ router.post("/departments/create", async (req, res) => {
     });
 
     res.status(201).json({
-      department: depData,
+      data: depData,
       message: "Department created successfully",
     });
   } catch (error: any) {
@@ -70,7 +76,7 @@ router.put("/departments/update/:id", async (req, res) => {
       },
     });
     res.json({
-      department: updatedDepartment,
+      data: updatedDepartment,
       message: "Department updated successfully",
     });
   } catch (error: any) {
@@ -86,7 +92,7 @@ router.put("/departments/delete/:id", async (req, res) => {
       data: { IsMarkToDelete: true, UpdatedAt: new Date() },
     });
     res.json({
-      department: deletedDepartment,
+      data: deletedDepartment,
       message: "Department marked for deletion successfully",
     });
   } catch (error: any) {

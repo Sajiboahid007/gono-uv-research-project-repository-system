@@ -16,7 +16,7 @@ router.get(
           IsMarkToDelete: false,
         },
       });
-      res.json({ batches, message: "Batches retrieved successfully" });
+      res.json({ data: batches, message: "Batches retrieved successfully" });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -32,7 +32,7 @@ router.get(
       const batches = await prisma.batches.findMany({
         where: { DepartmentId: departmentId, IsMarkToDelete: false },
       });
-      res.json({ batches, message: "Batches retrieved successfully" });
+      res.json({ data: batches, message: "Batches retrieved successfully" });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -68,7 +68,7 @@ router.post(
       const batch = await prisma.batches.create({
         data: { Name, Year, DepartmentId, IsMarkToDelete: false },
       });
-      res.json({ batch, message: "Batch created successfully" });
+      res.json({ data: batch, message: "Batch created successfully" });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -86,7 +86,7 @@ router.put(
         where: { Id: batchId },
         data: { Name, Year, DepartmentId },
       });
-      res.json({ batch: updatedBatch, message: "Batch updated successfully" });
+      res.json({ data: updatedBatch, message: "Batch updated successfully" });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -104,7 +104,7 @@ router.put(
         data: { IsMarkToDelete: true },
       });
       res.json({
-        batch: deletedBatch,
+        data: deletedBatch,
         message: "Batch marked for deletion successfully",
       });
     } catch (error: any) {
