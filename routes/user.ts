@@ -73,6 +73,30 @@ router.post("/users/create", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/register", async (req: Request, res: Response) => {
+  try {
+    const { Name, Email, StudentId, Password } = req.body;
+
+    const hashedPassword = await bcrypt.hash(Password, 10);
+    const newUser = await prisma.users.create({
+      data: {
+        RoleId: 1,
+        Name,
+        Email,
+        StudentId,
+        Password: hashedPassword,
+        DepartmentId: 1,
+        IsMarkToDelete: false,
+      },
+    });
+    res
+      .status(201)
+      .json({ data: newUser, message: "User created successfully" });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.put(
   "/users/update/:id",
   async (req: AuthenticatedRequest, res: Response) => {
