@@ -39,12 +39,14 @@ router.post("/login", async (req: Request, res: Response) => {
 router.get("/getToken/:refreshToken", async (req, res) => {
   try {
     const refreshToken = req?.params?.refreshToken;
+
     const sessionInfo = await refreshTokenForAlreadyExist(refreshToken);
 
     if (!sessionInfo) {
       res.status(404).json({
         message: "invalid refresh token",
       });
+      return;
     }
 
     const user = await prisma.users.findUnique({
@@ -60,68 +62,29 @@ router.get("/getToken/:refreshToken", async (req, res) => {
   }
 });
 
-async function refreshTokenForLogin(userId: number) {
-  if (userId <= 0) {
-    return null;
-  }
-
-  const userSession = await prisma.userSessions.findFirst({
-    where: {
-      AND: [{ UserId: userId.toString() }, { IsActive: true }],
-    },
-  });
-
-  const newToken = generateGUID();
-
-  if (userSession) {
-    await prisma.userSessions.update({
-      where: {
-        Id: userSession.Id,
-      },
-      data: {
-        RefreshtokenId: newToken,
-        IsActive: true,
-        CreatedDate: new Date(),
-        Id: userSession.Id,
-      },
-    });
-  } else {
-    await prisma.userSessions.create({
-      data: {
-        RefreshtokenId: newToken,
-        CreatedDate: new Date(),
-        IsActive: true,
-        Id: generateGUID(),
-        UserId: userId.toString(),
-      },
-    });
-  }
-  return { UserId: userId.toString(), RefreshToken: newToken };
-}
-
 // async function refreshTokenForLogin(userId: number) {
-//   if (!userId || userId <= 0) {
+//   if (userId <= 0) {
 //     return null;
 //   }
 
-//   const newToken = generateGUID();
-
 //   const userSession = await prisma.userSessions.findFirst({
 //     where: {
-//       UserId: userId.toString(),
-//       IsActive: true,
+//       AND: [{ UserId: userId.toString() }, { IsActive: true }],
 //     },
 //   });
+
+//   const newToken = generateGUID();
 
 //   if (userSession) {
 //     await prisma.userSessions.update({
 //       where: {
-//         Id: userSession.Id, // MUST be unique field
+//         Id: userSession.Id,
 //       },
 //       data: {
 //         RefreshtokenId: newToken,
 //         IsActive: true,
 //         CreatedDate: new Date(),
+//         Id: userSession.Id,
 //       },
 //     });
 //   } else {
@@ -129,17 +92,57 @@ async function refreshTokenForLogin(userId: number) {
 //       data: {
 //         RefreshtokenId: newToken,
 //         CreatedDate: new Date(),
-//         UserId: userId.toString(),
 //         IsActive: true,
+//         Id: generateGUID(),
+//         UserId: userId.toString(),
 //       },
 //     });
 //   }
-
-//   return {
-//     UserId: userId.toString(),
-//     RefreshToken: newToken,
-//   };
+//   return { UserId: userId.toString(), RefreshToken: newToken };
 // }
+
+async function refreshTokenForLogin(userId: number) {
+  if (!userId || userId <= 0) {
+    return null;
+  }
+
+  const newToken = generateGUID();
+
+  const userSession = await prisma.userSessions.findFirst({
+    where: {
+      UserId: userId.toString(),
+      IsActive: true,
+    },
+  });
+
+  if (userSession) {
+    await prisma.userSessions.update({
+      where: {
+        Id: userSession.Id, // MUST be unique field
+      },
+      data: {
+        RefreshtokenId: newToken,
+        IsActive: true,
+        CreatedDate: new Date(),
+      },
+    });
+  } else {
+    await prisma.userSessions.create({
+      data: {
+        Id: generateGUID(),
+        RefreshtokenId: newToken,
+        CreatedDate: new Date(),
+        UserId: userId.toString(),
+        IsActive: true,
+      },
+    });
+  }
+
+  return {
+    UserId: userId.toString(),
+    RefreshToken: newToken,
+  };
+}
 
 async function refreshTokenForAlreadyExist(refreshToken: string) {
   const userSession = await prisma.userSessions.findFirst({
@@ -173,7 +176,7 @@ function sendJwtToken(user: any, response: any, refreshToken: string) {
     //
     GRPConfig.JwtSecret,
     {
-      expiresIn: "7m", // "1h",
+      expiresIn: "1m", // "1h",
     },
   );
 

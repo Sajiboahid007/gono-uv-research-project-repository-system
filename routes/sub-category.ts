@@ -15,6 +15,13 @@ router.get(
         where: {
           IsMarkToDelete: false,
         },
+        include: {
+          Category: {
+            select: {
+              Name: true,
+            },
+          },
+        },
       });
       res.json({
         data: categories,

@@ -15,6 +15,13 @@ router.get(
         where: {
           IsMarkToDelete: false,
         },
+        include: {
+          Department: {
+            select: {
+              Name: true,
+            },
+          },
+        },
       });
       res.json({ data: batches, message: "Batches retrieved successfully" });
     } catch (error: any) {
@@ -47,6 +54,13 @@ router.get(
       const batchId = Number(req.params.id);
       const batch = await prisma.batches.findFirst({
         where: { Id: batchId, IsMarkToDelete: false },
+        include: {
+          Department: {
+            select: {
+              Name: true,
+            },
+          },
+        },
       });
       if (!batch) {
         res.status(404).json({ error: "Batch not found" });
@@ -64,9 +78,16 @@ router.post(
   authenticate,
   async (req: AuthenticatedRequest, res) => {
     try {
-      const { Name, Year, DepartmentId } = req.body;
+      const { Name, DepartmentId } = req.body;
+      const Year = Number(req.body.Year);
       const batch = await prisma.batches.create({
-        data: { Name, Year, DepartmentId, IsMarkToDelete: false },
+        data: {
+          Name,
+          Year,
+          DepartmentId,
+          IsMarkToDelete: false,
+          CreatedBy: req.userEmail || "Unknown",
+        },
       });
       res.json({ data: batch, message: "Batch created successfully" });
     } catch (error: any) {

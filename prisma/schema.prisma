@@ -15,24 +15,28 @@ model Department {
   UpdatedAt      DateTime? @db.DateTime
   IsMarkToDelete Boolean   @default(false, map: "DF__Departmen__IsMar__70DDC3D8")
   Batches        Batches[]
+  Users          Users[]
 }
 
 model Roles {
-  Id   Int    @id(map: "PK__Roles__3214EC07F35EAD1B") @default(autoincrement())
-  Name String @db.NVarChar(50)
+  Id    Int     @id(map: "PK__Roles__3214EC07F35EAD1B") @default(autoincrement())
+  Name  String  @db.NVarChar(50)
+  Users Users[]
 }
 
 model Users {
-  Id             Int       @id(map: "PK__Users__3214EC073D9CAFDD") @default(autoincrement())
-  Name           String    @db.VarChar(100)
-  Email String @unique @db.VarChar(150)
-  StudentId      String    @db.VarChar(150)
-  Password       String    @db.VarChar(Max)
+  Id             Int        @id(map: "PK__Users__3214EC073D9CAFDD") @default(autoincrement())
+  Name           String     @db.VarChar(100)
+  Email          String     @db.VarChar(150)
+  StudentId      String     @db.VarChar(150)
+  Password       String     @db.VarChar(Max)
   DepartmentId   Int
   RoleId         Int?
   IsMarkToDelete Boolean?
-  CreatedAt      DateTime? @db.DateTime
-  UpdatedAt      DateTime? @db.DateTime
+  CreatedAt      DateTime?  @db.DateTime
+  UpdatedAt      DateTime?  @db.DateTime
+  Department     Department @relation(fields: [DepartmentId], references: [Id], onUpdate: NoAction, map: "FK_Users_Department")
+  Roles          Roles?     @relation(fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Users_Roles")
 }
 
 model UserSessions {
