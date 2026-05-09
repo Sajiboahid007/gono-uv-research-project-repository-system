@@ -102,7 +102,8 @@ router.put(
   async (req: AuthenticatedRequest, res) => {
     try {
       const batchId = Number(req.params.id);
-      const { Name, Year, DepartmentId } = req.body;
+      const { Name, Year } = req.body;
+      const DepartmentId = Number(req.body.DepartmentId);
       const updatedBatch = await prisma.batches.update({
         where: { Id: batchId },
         data: { Name, Year, DepartmentId },

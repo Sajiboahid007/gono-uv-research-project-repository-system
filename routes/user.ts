@@ -66,7 +66,7 @@ router.get(
 router.get(
   "/users/get/:id",
   authenticate,
-  async (req: AuthenticatedRequest, res: Response) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
       const userId = Number(req.params.id);
       const user = await prisma.users.findUnique({
