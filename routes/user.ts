@@ -30,7 +30,12 @@ router.get(
           },
         },
       });
-      res.json({ data: users, message: "Users retrieved successfully" });
+
+      const usersWithoutPasswords = users.map(({ Password, ...user }) => user);
+      res.json({
+        data: usersWithoutPasswords,
+        message: "Users retrieved successfully",
+      });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -56,7 +61,12 @@ router.get(
           },
         },
       });
-      res.json({ data: users, message: "Users retrieved successfully" });
+
+      const usersWithoutPasswords = users.map(({ Password, ...user }) => user);
+      res.json({
+        data: usersWithoutPasswords,
+        message: "Users retrieved successfully",
+      });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -83,7 +93,12 @@ router.get(
         res.status(404).json({ error: "User not found" });
         return;
       }
-      res.json({ data: user, message: "User retrieved successfully" });
+      const { Password, ...userWithoutPassword } = user;
+
+      res.json({
+        data: userWithoutPassword,
+        message: "User retrieved successfully",
+      });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -141,13 +156,42 @@ router.post("/register", async (req: Request, res: Response) => {
   }
 });
 
+router.post(
+  "/user/create/admin",
+  authenticate,
+  async (req: Request, res: Response) => {
+    try {
+      const { Name, Email, StudentId, Password } = req.body;
+      const DepartmentId = Number(req.body.DepartmentId);
+
+      const hashedPassword = await bcrypt.hash(Password, 10);
+      const newUser = await prisma.users.create({
+        data: {
+          RoleId: 1,
+          Name,
+          Email,
+          StudentId,
+          Password: hashedPassword,
+          DepartmentId,
+          IsMarkToDelete: false,
+        },
+      });
+      res
+        .status(201)
+        .json({ data: newUser, message: "User created successfully" });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+);
+
 router.put(
   "/users/update/:id",
   authenticate,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = Number(req.params.id);
-      const { Name, Email, DepartmentId } = req.body;
+      const { Name, StudentId, RoleId, DepartmentId } = req.body;
 
       const updatedUser = await prisma.users.findFirst({
         where: { Id: userId },
@@ -159,7 +203,8 @@ router.put(
       const update = await prisma.users.update({
         data: {
           Name: Name,
-          Email: Email,
+          StudentId: StudentId,
+          RoleId: RoleId,
           DepartmentId: DepartmentId,
         },
         where: {
