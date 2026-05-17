@@ -18,6 +18,7 @@ const roleRouter = require("./routes/roles");
 const batchesRouter = require("./routes/batches");
 const categoryRouter = require("./routes/category");
 const subCategoryRouter = require("./routes/sub-category");
+const papers = require("./routes/papers");
 
 app.use("/api", userRouter);
 app.use("/api", loginRouter);
@@ -26,6 +27,7 @@ app.use("/api", roleRouter);
 app.use("/api", batchesRouter);
 app.use("/api", categoryRouter);
 app.use("/api", subCategoryRouter);
+app.use("/api", papers);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
 app.get("/openapi.json", (_req, res) => {
