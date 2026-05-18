@@ -15,6 +15,9 @@ router.get(
         where: {
           IsMarkToDelete: false,
         },
+        orderBy: {
+          Id: "desc",
+        },
         include: {
           Department: {
             select: {

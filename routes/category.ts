@@ -15,6 +15,9 @@ router.get(
         where: {
           IsMarkToDelete: false,
         },
+        orderBy: {
+          Id: "desc",
+        },
       });
       res.json({
         data: categories,

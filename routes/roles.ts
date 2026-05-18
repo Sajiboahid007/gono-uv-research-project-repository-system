@@ -6,7 +6,11 @@ const router = express.Router();
 
 router.get("/roles/get", async (_, res) => {
   try {
-    const roles = await prisma.roles.findMany({});
+    const roles = await prisma.roles.findMany({
+      orderBy: {
+        Id: "desc",
+      },
+    });
     res.json({ data: roles, message: "Roles retrieved successfully" });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

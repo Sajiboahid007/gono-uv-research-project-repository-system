@@ -17,14 +17,14 @@ router.post("/login", async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      res.status(401).json({ error: "Invalid Email or password" });
+      res.status(404).json({ error: "Email not found" });
       return;
     }
 
     const isMatch = await bcrypt.compare(Password, user.Password);
 
     if (!isMatch) {
-      res.status(401).json({ error: "Invalid Email or password" });
+      res.status(404).json({ error: "Invalid password" });
       return;
     }
 
@@ -176,7 +176,7 @@ function sendJwtToken(user: any, response: any, refreshToken: string) {
     //
     GRPConfig.JwtSecret,
     {
-      expiresIn: "1m", // "1h",
+      expiresIn: "7m", // "1h",
     },
   );
 

@@ -93,7 +93,7 @@ router.post("/paper/create", authenticate, async (req: AuthenticatedRequest, res
     });
     res.json({
       data: createPapers,
-      message: "Fail to create papers",
+      message: "Paper created successfully",
     });
   } catch (error) {
     res.status(500).json({ error: error });
@@ -182,6 +182,9 @@ router.get("/paper/getbyUserId/:id", authenticate, async (req: AuthenticatedRequ
       where: {
         UserId: id,
         IsMarkToDelete: false,
+      },
+      orderBy: {
+        Id: "desc",
       },
       include: {
         Users: {
