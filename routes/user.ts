@@ -31,6 +31,11 @@ router.get(
               Name: true,
             },
           },
+          Batches: {
+            select: {
+              Name: true,
+            },
+          },
         },
       });
 
@@ -62,6 +67,11 @@ router.get(
               Name: true,
             },
           },
+          Batches: {
+            select: {
+              Name: true,
+            },
+          },
         },
       });
 
@@ -86,6 +96,12 @@ router.get(
         where: { Id: userId },
         include: {
           Department: {
+            select: {
+              Name: true,
+              Code: true,
+            },
+          },
+          Batches: {
             select: {
               Name: true,
             },
@@ -113,8 +129,15 @@ router.post(
   authenticate,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { RoleId, Name, Email, StudentId, Password, DepartmentId } =
-        req.body;
+      const {
+        RoleId,
+        Name,
+        Email,
+        StudentId,
+        Password,
+        DepartmentId,
+        BatchId,
+      } = req.body;
       const hashedPassword = await bcrypt.hash(Password, 10);
       const newUser = await prisma.users.create({
         data: {
@@ -124,6 +147,7 @@ router.post(
           StudentId,
           Password: hashedPassword,
           DepartmentId,
+          BatchId,
         },
       });
       res
@@ -166,6 +190,7 @@ router.post(
     try {
       const { Name, Email, StudentId, Password } = req.body;
       const DepartmentId = Number(req.body.DepartmentId);
+      const BatchId = Number(req.body.BatchId);
 
       const hashedPassword = await bcrypt.hash(Password, 10);
       const newUser = await prisma.users.create({
@@ -176,6 +201,7 @@ router.post(
           StudentId,
           Password: hashedPassword,
           DepartmentId,
+          BatchId,
           IsMarkToDelete: false,
         },
       });
@@ -194,7 +220,7 @@ router.put(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = Number(req.params.id);
-      const { Name, StudentId, RoleId, DepartmentId } = req.body;
+      const { Name, StudentId, RoleId, DepartmentId, BatchId } = req.body;
 
       const updatedUser = await prisma.users.findFirst({
         where: { Id: userId },
@@ -209,6 +235,7 @@ router.put(
           StudentId: StudentId,
           RoleId: RoleId,
           DepartmentId: DepartmentId,
+          BatchId: BatchId,
         },
         where: {
           Id: userId,
