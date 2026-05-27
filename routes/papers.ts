@@ -2,6 +2,7 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { authenticate } from "../authenticate";
 import { AuthenticatedRequest } from "../interface";
+import { GRPConfig } from "../GRPConfig";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -14,6 +15,9 @@ router.get(
       const getPapers = await prisma.papers.findMany({
         where: {
           IsMarkToDelete: false,
+        },
+        orderBy: {
+          Id: "desc",
         },
         include: {
           Category: {
@@ -81,27 +85,69 @@ router.post(
   async (req: AuthenticatedRequest, res) => {
     try {
       const { Title, Abstract, Year, FileUrl } = req.body;
-      const { UserId, CategoryId, SubcategoryId, DepartmentId, BatchId } =
-        req.body;
-      const createPapers = await prisma.papers.create({
-        data: {
-          Title,
-          Abstract,
-          CategoryId: Number(CategoryId),
-          SubcategoryId: Number(SubcategoryId),
-          DepartmentId: Number(DepartmentId),
-          BatchId: Number(BatchId),
-          UserId: Number(UserId),
-          Year,
-          FileUrl,
-          IsMarkToDelete: false,
-          CreatedDate: new Date(),
-          CreatedBy: req.userEmail || "Unknown",
-          UpdatedBy: req.userEmail || "Unknown",
-        },
+      const { CategoryId, SubcategoryId, DepartmentId, BatchId } = req.body;
+      const { StudentIds, TeacherIds } = req.body;
+
+      let userId = req.userId;
+
+      // Start interactive transaction
+      const result = await prisma.$transaction(async (tx) => {
+        // 1. Create the paper
+        const createPapers = await tx.papers.create({
+          data: {
+            Title,
+            Abstract,
+            CategoryId: Number(CategoryId),
+            SubcategoryId: Number(SubcategoryId),
+            DepartmentId: Number(DepartmentId),
+            BatchId: Number(BatchId),
+            UserId: Number(userId),
+            Year,
+            FileUrl,
+            CreatedBy: req.userEmail || "Unknown",
+          },
+        });
+
+        // 2. Create paper groups for students
+        for (const student of StudentIds) {
+          await tx.paperGroups.create({
+            data: {
+              PaperId: createPapers.Id,
+              UserId: Number(student),
+              UserType: GRPConfig.RoleName.Student,
+              CreatedBy: req.userEmail || "Unknown",
+            },
+          });
+        }
+
+        // 3. Create paper groups for teachers
+        for (const teacher of TeacherIds) {
+          await tx.paperGroups.create({
+            data: {
+              PaperId: createPapers.Id,
+              UserId: Number(teacher),
+              UserType: GRPConfig.RoleName.Teacher,
+              CreatedBy: req.userEmail || "Unknown",
+            },
+          });
+        }
+
+        // 4. Create paper approval
+        await tx.paperApprovals.create({
+          data: {
+            PaperId: createPapers.Id,
+            Status: GRPConfig.ApprovalStatus.Pending,
+            CreatedBy: req.userEmail || "Unknown",
+          },
+        });
+
+        // Return the paper data (or anything you need)
+        return createPapers;
       });
+
+      // If we get here, everything succeeded
       res.json({
-        data: createPapers,
+        data: result,
         message: "Paper created successfully",
       });
     } catch (error) {

@@ -8,4 +8,15 @@ export class GRPConfig {
     api_key: "982571435293465",
     api_secret: "1Onpk-7Polfo5-FupeSlZlKkDXQ",
   } as const;
+
+  public static readonly RoleName = {
+    Student: "Student",
+    Teacher: "Teacher",
+  } as const;
+
+  public static readonly ApprovalStatus = {
+    Pending: "Pending",
+    Approved: "Approved",
+    Rejected: "Rejected",
+  } as const;
 }

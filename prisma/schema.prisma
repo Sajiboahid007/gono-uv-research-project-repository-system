@@ -26,22 +26,23 @@ model Roles {
 }
 
 model Users {
-  Id             Int          @id(map: "PK__Users__3214EC073D9CAFDD") @default(autoincrement())
-  Name           String       @db.VarChar(100)
-  Email          String       @db.VarChar(150)
-  StudentId      String       @db.VarChar(150)
-  Password       String       @db.VarChar(Max)
+  Id             Int              @id(map: "PK__Users__3214EC073D9CAFDD") @default(autoincrement())
+  Name           String           @db.VarChar(100)
+  Email          String           @db.VarChar(150)
+  StudentId      String           @db.VarChar(150)
+  Password       String           @db.VarChar(Max)
   DepartmentId   Int
   RoleId         Int?
   IsMarkToDelete Boolean?
-  CreatedAt      DateTime?    @db.DateTime
-  UpdatedAt      DateTime?    @db.DateTime
+  CreatedAt      DateTime?        @db.DateTime
+  UpdatedAt      DateTime?        @db.DateTime
   BatchId        Int?
-  PaperGroup     PaperGroup[]
+  PaperApprovals PaperApprovals[]
+  PaperGroups    PaperGroups[]
   Papers         Papers[]
-  Batches        Batches?     @relation(fields: [BatchId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Users_Batches")
-  Department     Department   @relation(fields: [DepartmentId], references: [Id], onUpdate: NoAction, map: "FK_Users_Department")
-  Roles          Roles?       @relation(fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Users_Roles")
+  Batches        Batches?         @relation(fields: [BatchId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Users_Batches")
+  Department     Department       @relation(fields: [DepartmentId], references: [Id], onUpdate: NoAction, map: "FK_Users_Department")
+  Roles          Roles?           @relation(fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Users_Roles")
 }
 
 model UserSessions {
@@ -95,30 +96,47 @@ model SubCategory {
 }
 
 model Papers {
-  Id             Int          @id(map: "PK__Papers__3214EC07F8A04F5C") @default(autoincrement())
-  Title          String?      @db.VarChar(Max)
-  Abstract       String?      @db.VarChar(Max)
+  Id             Int              @id(map: "PK__Papers__3214EC07F8A04F5C") @default(autoincrement())
+  Title          String?          @db.VarChar(Max)
+  Abstract       String?          @db.VarChar(Max)
   UserId         Int?
   CategoryId     Int?
   SubcategoryId  Int?
   DepartmentId   Int?
   BatchId        Int?
-  Year           String?      @db.VarChar(Max)
-  FileUrl        String?      @db.VarChar(Max)
-  CreatedDate    DateTime?    @default(now(), map: "DF__Papers__CreatedD__2DE6D218") @db.DateTime
-  UpdatedDate    DateTime?    @db.DateTime
-  CreatedBy      String?      @db.VarChar(Max)
-  UpdatedBy      String?      @db.VarChar(Max)
-  IsMarkToDelete Boolean?     @default(false, map: "DF__Papers__IsMarkTo__4D5F7D71")
-  PaperGroup     PaperGroup[]
-  Batches        Batches?     @relation(fields: [BatchId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Papers__BatchId__2CF2ADDF")
-  Category       Category?    @relation(fields: [CategoryId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Papers__Category__2A164134")
-  Department     Department?  @relation(fields: [DepartmentId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Papers__Departme__2BFE89A6")
-  SubCategory    SubCategory? @relation(fields: [SubcategoryId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Papers__Subcateg__2B0A656D")
-  Users          Users?       @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Papers__UserId__29221CFB")
+  Year           String?          @db.VarChar(Max)
+  FileUrl        String?          @db.VarChar(Max)
+  CreatedDate    DateTime?        @default(now(), map: "DF__Papers__CreatedD__2DE6D218") @db.DateTime
+  UpdatedDate    DateTime?        @db.DateTime
+  CreatedBy      String?          @db.VarChar(Max)
+  UpdatedBy      String?          @db.VarChar(Max)
+  IsMarkToDelete Boolean?         @default(false, map: "DF__Papers__IsMarkTo__4D5F7D71")
+  PaperApprovals PaperApprovals[]
+  PaperGroups    PaperGroups[]
+  Batches        Batches?         @relation(fields: [BatchId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Papers__BatchId__2CF2ADDF")
+  Category       Category?        @relation(fields: [CategoryId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Papers__Category__2A164134")
+  Department     Department?      @relation(fields: [DepartmentId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Papers__Departme__2BFE89A6")
+  SubCategory    SubCategory?     @relation(fields: [SubcategoryId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Papers__Subcateg__2B0A656D")
+  Users          Users?           @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Papers__UserId__29221CFB")
 }
 
-model PaperGroup {
+model PaperApprovals {
+  Id               Int       @id(map: "PK__PaperApp__3214EC077A214F6A") @default(autoincrement())
+  PaperId          Int?
+  ApprovedByUserId Int?
+  ApprovedDate     DateTime? @default(now(), map: "DF__PaperAppr__Appro__625A9A57") @db.DateTime
+  Status           String?   @db.VarChar(20)
+  Remarks          String?   @db.Text
+  CreatedDate      DateTime? @default(now(), map: "DF__PaperAppr__Creat__634EBE90") @db.DateTime
+  UpdatedDate      DateTime? @db.DateTime
+  CreatedBy        String?   @db.Text
+  UpdatedBy        String?   @db.Text
+  IsMarkToDelete   Boolean?  @default(false, map: "DF__PaperAppr__IsMar__65370702")
+  Users            Users?    @relation(fields: [ApprovedByUserId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__PaperAppr__Appro__671F4F74")
+  Papers           Papers?   @relation(fields: [PaperId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__PaperAppr__Paper__662B2B3B")
+}
+
+model PaperGroups {
   Id          Int       @id(map: "PK__PaperGro__3214EC070B95F17F") @default(autoincrement())
   PaperId     Int?
   UserType    String?   @db.VarChar(Max)

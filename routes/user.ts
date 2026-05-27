@@ -106,6 +106,11 @@ router.get(
               Name: true,
             },
           },
+          Roles: {
+            select: {
+              Name: true,
+            },
+          },
         },
       });
       if (!user) {

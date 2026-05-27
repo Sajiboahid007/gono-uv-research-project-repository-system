@@ -63,6 +63,7 @@ router.post(
           Name,
           Code,
           IsMarkToDelete: false,
+          CreatedBy: req.userEmail || "Unknown",
         },
       });
       res.json({
@@ -97,6 +98,8 @@ router.put(
         data: {
           Name,
           Code,
+          UpdatedBy: req.userEmail || "Unknown",
+          UpdatedDate: new Date(),
         },
       });
 
