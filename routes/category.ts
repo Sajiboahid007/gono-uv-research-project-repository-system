@@ -99,7 +99,7 @@ router.put(
           Name,
           Code,
           UpdatedBy: req.userEmail || "Unknown",
-          UpdatedDate: new Date(),
+          UpdatedAt: new Date(),
         },
       });
 

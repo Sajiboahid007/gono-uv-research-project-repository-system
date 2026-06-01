@@ -37,6 +37,7 @@ model Users {
   CreatedAt      DateTime?        @db.DateTime
   UpdatedAt      DateTime?        @db.DateTime
   BatchId        Int?
+  ImageUrl       String?          @db.Text
   PaperApprovals PaperApprovals[]
   PaperGroups    PaperGroups[]
   Papers         Papers[]

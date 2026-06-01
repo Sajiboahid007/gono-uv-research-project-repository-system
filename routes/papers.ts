@@ -339,4 +339,69 @@ router.put(
   },
 );
 
+router.get(
+  "/paper/getPapersByUserId/:id",
+  authenticate,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const id = Number(req.params.id);
+      const papers = await prisma.papers.findMany({
+        where: {
+          PaperGroups: {
+            some: {
+              UserId: id,
+            },
+          },
+        },
+        include: {
+          Category: {
+            select: {
+              Name: true,
+            },
+          },
+          SubCategory: {
+            select: {
+              Name: true,
+            },
+          },
+          Department: {
+            select: {
+              Name: true,
+            },
+          },
+          Batches: {
+            select: {
+              Name: true,
+            },
+          },
+          PaperGroups: {
+            select: {
+              Id: true,
+              UserId: true,
+              UserType: true,
+            },
+          },
+          PaperApprovals: {
+            select: {
+              Id: true,
+              Status: true,
+              Remarks: true,
+              ApprovedByUserId: true,
+              ApprovedDate: true,
+            },
+          },
+        },
+      });
+
+      res.json({
+        data: papers,
+        message: "Fail to get papers",
+      });
+    } catch (error) {
+      res.status(500).json({ error: error });
+    }
+  },
+);
+
+
 module.exports = router;

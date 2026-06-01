@@ -259,6 +259,41 @@ router.put(
 );
 
 router.put(
+  "/users/update/image/:id",
+  authenticate,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = Number(req.params.id);
+      const { ImageUrl } = req.body;
+
+      const updatedUser = await prisma.users.findFirst({
+        where: { Id: userId },
+      });
+      if (!updatedUser) {
+        return res.status(401).json({ message: "user not found!" });
+      }
+
+      const update = await prisma.users.update({
+        data: {
+          ImageUrl: ImageUrl,
+        },
+        where: {
+          Id: userId,
+        },
+      });
+      return res.status(201).json({
+        data: update,
+        message: "User updated successfully",
+      });
+    } catch (error: any) {
+      return res
+        .status(500)
+        .json({ error: "An error occurred while updating the user" });
+    }
+  },
+);
+
+router.put(
   "/users/delete/:id",
   authenticate,
   async (req: AuthenticatedRequest, res: Response) => {
