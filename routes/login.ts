@@ -14,6 +14,11 @@ router.post("/login", async (req: Request, res: Response) => {
     const { Password, Email } = req?.body;
     const user = await prisma.users.findFirst({
       where: { Email: Email },
+      include: {
+        Roles: {
+          select: { Name: true },
+        },
+      },
     });
 
     if (!user) {
@@ -53,6 +58,11 @@ router.get("/getToken/:refreshToken", async (req, res) => {
       where: {
         Id: Number(sessionInfo?.UserId),
       },
+      include: {
+        Roles: {
+          select: { Name: true },
+        },
+      },
     });
 
     sendJwtToken(user, res, sessionInfo?.RefreshToken ?? "");
@@ -61,45 +71,6 @@ router.get("/getToken/:refreshToken", async (req, res) => {
     res.status(404).json({ error: error });
   }
 });
-
-// async function refreshTokenForLogin(userId: number) {
-//   if (userId <= 0) {
-//     return null;
-//   }
-
-//   const userSession = await prisma.userSessions.findFirst({
-//     where: {
-//       AND: [{ UserId: userId.toString() }, { IsActive: true }],
-//     },
-//   });
-
-//   const newToken = generateGUID();
-
-//   if (userSession) {
-//     await prisma.userSessions.update({
-//       where: {
-//         Id: userSession.Id,
-//       },
-//       data: {
-//         RefreshtokenId: newToken,
-//         IsActive: true,
-//         CreatedDate: new Date(),
-//         Id: userSession.Id,
-//       },
-//     });
-//   } else {
-//     await prisma.userSessions.create({
-//       data: {
-//         RefreshtokenId: newToken,
-//         CreatedDate: new Date(),
-//         IsActive: true,
-//         Id: generateGUID(),
-//         UserId: userId.toString(),
-//       },
-//     });
-//   }
-//   return { UserId: userId.toString(), RefreshToken: newToken };
-// }
 
 async function refreshTokenForLogin(userId: number) {
   if (!userId || userId <= 0) {
@@ -171,7 +142,7 @@ function sendJwtToken(user: any, response: any, refreshToken: string) {
     {
       userId: user?.Id,
       userEmail: user?.Email,
-      role: user?.Roles?.RoleName,
+      role: user?.Roles?.Name,
     },
     //
     GRPConfig.JwtSecret,

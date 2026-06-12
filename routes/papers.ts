@@ -45,6 +45,11 @@ router.get(
               Name: true,
             },
           },
+          PaperApprovals: {
+            select: {
+              Status: true,
+            },
+          },
         },
       });
       res.json({
@@ -133,10 +138,21 @@ router.post(
         }
 
         // 4. Create paper approval
-        await tx.paperApprovals.create({
+        const paperAproval = await tx.paperApprovals.create({
           data: {
             PaperId: createPapers.Id,
-            Status: GRPConfig.ApprovalStatus.Pending,
+            Status: GRPConfig.ApprovalStatus.Draft,
+            CreatedBy: req.userEmail || "Unknown",
+          },
+        });
+
+        await tx.paperApprovalHistories.create({
+          data: {
+            PaperApprovalId: paperAproval.Id,
+            PaperId: createPapers.Id,
+            Status: paperAproval.Status,
+            Remarks: "academic paper submission initialization",
+            ApprovedByUser: req.userEmail || "Unknown",
             CreatedBy: req.userEmail || "Unknown",
           },
         });
@@ -402,6 +418,5 @@ router.get(
     }
   },
 );
-
 
 module.exports = router;

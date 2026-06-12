@@ -15,6 +15,7 @@ export class GRPConfig {
   } as const;
 
   public static readonly ApprovalStatus = {
+    Draft: "Draft",
     Pending: "Pending",
     Approved: "Approved",
     Rejected: "Rejected",
