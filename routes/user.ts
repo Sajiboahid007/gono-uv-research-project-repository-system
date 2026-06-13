@@ -193,27 +193,14 @@ router.post(
   authenticate,
   async (req: Request, res: Response) => {
     try {
-      const { Name, Email, StudentId, Password } = req.body;
+      const { Name, Email, StudentId, Password, RoleId } = req.body;
       const DepartmentId = Number(req.body.DepartmentId);
       const BatchId = Number(req.body.BatchId);
-
-      // Check if email already exists
-      const existingUser = await prisma.users.findUnique({
-        where: {
-          Email: Email,
-        },
-      });
-
-      if (existingUser) {
-        res.status(400).json({
-          message: "Email already exists",
-        });
-      }
 
       const hashedPassword = await bcrypt.hash(Password, 10);
       const newUser = await prisma.users.create({
         data: {
-          RoleId: 1,
+          RoleId: Number(RoleId),
           Name,
           Email,
           StudentId,

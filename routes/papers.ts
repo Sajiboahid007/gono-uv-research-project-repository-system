@@ -50,6 +50,12 @@ router.get(
               Status: true,
             },
           },
+          PaperGroups: {
+            select: {
+              UserId: true,
+              UserType: true,
+            },
+          },
         },
       });
       res.json({
@@ -62,16 +68,76 @@ router.get(
   },
 );
 
+
+
 router.get(
-  "/paper/getById/:id",
+  "/paper/getPaperApprovalByUserId",
   authenticate,
-  async (req: AuthenticatedRequest, res) => {
+  async (_req: AuthenticatedRequest, res) => {
     try {
-      const id = Number(req.params.id);
-      const getPapers = await prisma.papers.findUnique({
+
+      const userRole = _req?.role;
+      console.log(userRole);
+      let paperApprovalGroup: any = {
+        select: {
+          UserId: true,
+          UserType: true,
+        },
+      };
+
+      if (userRole === GRPConfig.RoleName?.Student
+        || userRole === GRPConfig.RoleName?.Teacher) {
+        console.log("here i am in role", userRole);
+        paperApprovalGroup = {
+          where: {
+            UserId: _req.userId || 0,
+          },
+          select: {
+            UserId: true,
+            UserType: true,
+          },
+        };
+      }
+
+      const getPapers = await prisma.papers.findMany({
         where: {
-          Id: id,
           IsMarkToDelete: false,
+        },
+        orderBy: {
+          Id: "desc",
+        },
+        include: {
+          Category: {
+            select: {
+              Name: true,
+            },
+          },
+          SubCategory: {
+            select: {
+              Name: true,
+            },
+          },
+          Department: {
+            select: {
+              Name: true,
+            },
+          },
+          Batches: {
+            select: {
+              Name: true,
+            },
+          },
+          Users: {
+            select: {
+              Name: true,
+            },
+          },
+          PaperApprovals: {
+            select: {
+              Status: true,
+            },
+          },
+          PaperGroups: paperApprovalGroup,
         },
       });
       res.json({
@@ -83,6 +149,24 @@ router.get(
     }
   },
 );
+
+router.get(":id", authenticate, async (req: AuthenticatedRequest, res) => {
+  try {
+    const id = Number(req.params.id);
+    const getPapers = await prisma.papers.findUnique({
+      where: {
+        Id: id,
+        IsMarkToDelete: false,
+      },
+    });
+    res.json({
+      data: getPapers,
+      message: "Fail to get papers",
+    });
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+});
 
 router.post(
   "/paper/create",

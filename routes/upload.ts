@@ -20,11 +20,6 @@ const storage = new CloudinaryStorage({
   params: async (_req, file) => {
     const originalName = file.originalname;
     const ext = originalName.split(".").pop();
-    const name = originalName.replace(/\.[^/.]+$/, "");
-
-    console.log("ext: ", ext);
-    console.log("name: ", name);
-    console.log('originalName: ', originalName)
 
     return {
       folder: "academic-papers",
