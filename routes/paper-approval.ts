@@ -41,6 +41,12 @@ router.get(
                   Name: true,
                 },
               },
+              PaperGroups: {
+                select: {
+                  UserId: true,
+                  UserType: true,
+                },
+              },
             },
           },
         },
