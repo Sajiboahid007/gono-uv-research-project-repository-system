@@ -60,7 +60,7 @@ router.get(
       });
       res.json({
         data: getPapers,
-        message: "Fail to get papers",
+        message: "Success to get papers",
       });
     } catch (error) {
       res.status(500).json({ error: error });
@@ -75,9 +75,7 @@ router.get(
   authenticate,
   async (_req: AuthenticatedRequest, res) => {
     try {
-
       const userRole = _req?.role;
-      console.log(userRole);
       let paperApprovalGroup: any = {
         select: {
           UserId: true,
@@ -87,7 +85,6 @@ router.get(
 
       if (userRole === GRPConfig.RoleName?.Student
         || userRole === GRPConfig.RoleName?.Teacher) {
-        console.log("here i am in role", userRole);
         paperApprovalGroup = {
           where: {
             UserId: _req.userId || 0,
@@ -150,7 +147,7 @@ router.get(
   },
 );
 
-router.get(":id", authenticate, async (req: AuthenticatedRequest, res) => {
+router.get("/paper/getById/:id", authenticate, async (req: AuthenticatedRequest, res) => {
   try {
     const id = Number(req.params.id);
     const getPapers = await prisma.papers.findUnique({
@@ -256,92 +253,9 @@ router.post(
   },
 );
 
-router.get(
-  "/paper/getbycategoryId/:id",
-  authenticate,
-  async (req: AuthenticatedRequest, res) => {
-    try {
-      const id = Number(req.params.id);
-      const getPapers = await prisma.papers.findMany({
-        where: {
-          CategoryId: id,
-          IsMarkToDelete: false,
-        },
-        include: {
-          Category: {
-            select: {
-              Name: true,
-            },
-          },
-        },
-      });
-      res.json({
-        data: getPapers,
-        message: "Fail to get papers",
-      });
-    } catch (error) {
-      res.status(500).json({ error: error });
-    }
-  },
-);
 
-router.get(
-  "/paper/getbySubcategoryId/:id",
-  authenticate,
-  async (req: AuthenticatedRequest, res) => {
-    try {
-      const id = Number(req.params.id);
-      const getPapers = await prisma.papers.findMany({
-        where: {
-          SubcategoryId: id,
-          IsMarkToDelete: false,
-        },
-        include: {
-          SubCategory: {
-            select: {
-              Name: true,
-            },
-          },
-        },
-      });
-      res.json({
-        data: getPapers,
-        message: "Fail to get papers",
-      });
-    } catch (error) {
-      res.status(500).json({ error: error });
-    }
-  },
-);
 
-router.get(
-  "/paper/getbyDepartmentId/:id",
-  authenticate,
-  async (req: AuthenticatedRequest, res) => {
-    try {
-      const id = Number(req.params.id);
-      const getPapers = await prisma.papers.findMany({
-        where: {
-          DepartmentId: id,
-          IsMarkToDelete: false,
-        },
-        include: {
-          Department: {
-            select: {
-              Name: true,
-            },
-          },
-        },
-      });
-      res.json({
-        data: getPapers,
-        message: "Fail to get papers",
-      });
-    } catch (error) {
-      res.status(500).json({ error: error });
-    }
-  },
-);
+
 
 router.get(
   "/paper/getbyUserId/:id",

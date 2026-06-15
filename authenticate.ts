@@ -20,11 +20,13 @@ export const authenticate = (
     const decoded = jwt.verify(token, GRPConfig.GRPConfig.JwtSecret) as {
       userId: number;
       userEmail: string;
-      roles: string;
+      role: string;
     };
     req.userId = decoded.userId;
     req.userEmail = decoded.userEmail;
-    req.role = decoded.roles;
+    req.role = decoded.role;
+
+
     next();
   } catch (error) {
     res.status(401).json({ message: "Invalid or expired token" });
