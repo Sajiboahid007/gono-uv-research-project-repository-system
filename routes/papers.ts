@@ -68,8 +68,6 @@ router.get(
   },
 );
 
-
-
 router.get(
   "/paper/getPaperApprovalByUserId",
   authenticate,
@@ -83,8 +81,10 @@ router.get(
         },
       };
 
-      if (userRole === GRPConfig.RoleName?.Student
-        || userRole === GRPConfig.RoleName?.Teacher) {
+      if (
+        userRole === GRPConfig.RoleName?.Student ||
+        userRole === GRPConfig.RoleName?.Teacher
+      ) {
         paperApprovalGroup = {
           where: {
             UserId: _req.userId || 0,
@@ -147,23 +147,27 @@ router.get(
   },
 );
 
-router.get("/paper/getById/:id", authenticate, async (req: AuthenticatedRequest, res) => {
-  try {
-    const id = Number(req.params.id);
-    const getPapers = await prisma.papers.findUnique({
-      where: {
-        Id: id,
-        IsMarkToDelete: false,
-      },
-    });
-    res.json({
-      data: getPapers,
-      message: "Fail to get papers",
-    });
-  } catch (error) {
-    res.status(500).json({ error: error });
-  }
-});
+router.get(
+  "/paper/getById/:id",
+  authenticate,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const id = Number(req.params.id);
+      const getPapers = await prisma.papers.findUnique({
+        where: {
+          Id: id,
+          IsMarkToDelete: false,
+        },
+      });
+      res.json({
+        data: getPapers,
+        message: "Fail to get papers",
+      });
+    } catch (error) {
+      res.status(500).json({ error: error });
+    }
+  },
+);
 
 router.post(
   "/paper/create",
@@ -253,10 +257,6 @@ router.post(
   },
 );
 
-
-
-
-
 router.get(
   "/paper/getbyUserId/:id",
   authenticate,
@@ -281,7 +281,7 @@ router.get(
       });
       res.json({
         data: getPapers,
-        message: "Fail to get papers",
+        message: "Successfully get papers",
       });
     } catch (error) {
       res.status(500).json({ error: error });
@@ -320,7 +320,7 @@ router.put(
       });
       res.json({
         data: updatePapers,
-        message: "Fail to update papers",
+        message: "Successfully update papers",
       });
     } catch (error) {
       res.status(500).json({ error: error });
@@ -345,7 +345,7 @@ router.put(
       });
       res.json({
         data: deletePapers,
-        message: "Fail to delete papers",
+        message: "Successfully delete papers",
       });
     } catch (error) {
       res.status(500).json({ error: error });
@@ -409,7 +409,7 @@ router.get(
 
       res.json({
         data: papers,
-        message: "Fail to get papers",
+        message: "Successfully get papers",
       });
     } catch (error) {
       res.status(500).json({ error: error });

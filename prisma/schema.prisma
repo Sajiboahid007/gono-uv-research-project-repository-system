@@ -38,6 +38,7 @@ model Users {
   UpdatedAt      DateTime?        @db.DateTime
   BatchId        Int?
   ImageUrl       String?          @db.Text
+  Journals       Journals[]
   PaperApprovals PaperApprovals[]
   PaperGroups    PaperGroups[]
   Papers         Papers[]
@@ -78,22 +79,24 @@ model Category {
   UpdatedAt      DateTime?
   CreatedBy      String?       @db.NVarChar(Max)
   UpdatedBy      String?       @db.NVarChar(Max)
+  Journals       Journals[]
   Papers         Papers[]
   SubCategory    SubCategory[]
 }
 
 model SubCategory {
-  Id             Int       @id(map: "PK__SubCateg__3214EC0799321578") @default(autoincrement())
-  Name           String    @db.NVarChar(100)
-  Code           String?   @db.NVarChar(50)
-  IsMarkToDelete Boolean   @default(false, map: "DF__SubCatego__IsMar__0A9D95DB")
+  Id             Int        @id(map: "PK__SubCateg__3214EC0799321578") @default(autoincrement())
+  Name           String     @db.NVarChar(100)
+  Code           String?    @db.NVarChar(50)
+  IsMarkToDelete Boolean    @default(false, map: "DF__SubCatego__IsMar__0A9D95DB")
   CategoryId     Int
-  CreatedAt      DateTime? @default(now(), map: "DF__SubCatego__Creat__0B91BA14")
+  CreatedAt      DateTime?  @default(now(), map: "DF__SubCatego__Creat__0B91BA14")
   UpdatedAt      DateTime?
-  CreatedBy      String    @db.NVarChar(Max)
-  UpdatedBy      String?   @db.NVarChar(Max)
+  CreatedBy      String     @db.NVarChar(Max)
+  UpdatedBy      String?    @db.NVarChar(Max)
+  Journals       Journals[]
   Papers         Papers[]
-  Category       Category  @relation(fields: [CategoryId], references: [Id], onUpdate: NoAction, map: "FK_SubCategory_Category")
+  Category       Category   @relation(fields: [CategoryId], references: [Id], onUpdate: NoAction, map: "FK_SubCategory_Category")
 }
 
 model Papers {
@@ -134,9 +137,11 @@ model PaperApprovals {
   CreatedBy              String?                  @db.Text
   UpdatedBy              String?                  @db.Text
   IsMarkToDelete         Boolean?                 @default(false, map: "DF__PaperAppr__IsMar__65370702")
+  JournalId              Int?
   PaperApprovalHistories PaperApprovalHistories[]
   Users                  Users?                   @relation(fields: [ApprovedByUserId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__PaperAppr__Appro__671F4F74")
   Papers                 Papers?                  @relation(fields: [PaperId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__PaperAppr__Paper__662B2B3B")
+  Journals               Journals?                @relation(fields: [JournalId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_PaperApprovals_Journals")
 }
 
 model PaperGroups {
@@ -148,8 +153,10 @@ model PaperGroups {
   UpdatedDate DateTime? @db.DateTime
   CreatedBy   String?   @db.VarChar(Max)
   UpdatedBy   String?   @db.VarChar(Max)
+  JournalId   Int?
   Papers      Papers?   @relation(fields: [PaperId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__PaperGrou__Paper__30C33EC3")
   Users       Users?    @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__PaperGrou__UserI__31B762FC")
+  Journals    Journals? @relation(fields: [JournalId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_PaperGroups_Journals")
 }
 
 model PaperApprovalHistories {
@@ -162,6 +169,38 @@ model PaperApprovalHistories {
   ApprovalDate    DateTime?       @default(now(), map: "DF__PaperAppr__Appro__0A688BB1") @db.DateTime
   CreatedDate     DateTime?       @default(now(), map: "DF__PaperAppr__Creat__0B5CAFEA") @db.DateTime
   CreatedBy       String?         @db.Text
+  JournalId       Int?
   Papers          Papers?         @relation(fields: [PaperId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__PaperAppr__Paper__0880433F")
   PaperApprovals  PaperApprovals? @relation(fields: [PaperApprovalId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__PaperAppr__Paper__09746778")
+  Journals        Journals?       @relation(fields: [JournalId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_PaperApprovalHistories_Journals")
+}
+
+model Journals {
+  Id                     Int                      @id(map: "PK__Journals__3214EC07581D5BA5") @default(autoincrement())
+  Title                  String?                  @db.VarChar(Max)
+  Abstract               String?                  @db.VarChar(Max)
+  UserId                 Int?
+  CategoryId             Int?
+  SubcategoryId          Int?
+  Name                   String?                  @db.VarChar(Max)
+  Authors                String?                  @db.VarChar(Max)
+  Affiliation            String?                  @db.VarChar(Max)
+  Keywords               String?                  @db.VarChar(Max)
+  AuthorDeclaration      String?                  @db.VarChar(Max)
+  Volume                 String?                  @db.VarChar(50)
+  IssueNumber            String?                  @db.VarChar(50)
+  DOI                    String?                  @db.VarChar(255)
+  Year                   String?                  @db.VarChar(10)
+  FileUrl                String?                  @db.VarChar(Max)
+  CreatedDate            DateTime?                @default(now(), map: "DF__Journals__Create__1B9317B3") @db.DateTime
+  UpdatedDate            DateTime?                @db.DateTime
+  CreatedBy              String?                  @db.VarChar(Max)
+  UpdatedBy              String?                  @db.VarChar(Max)
+  IsMarkToDelete         Boolean?                 @default(false, map: "DF__Journals__IsMark__1C873BEC")
+  Category               Category?                @relation(fields: [CategoryId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Journals_Category")
+  SubCategory            SubCategory?             @relation(fields: [SubcategoryId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Journals_SubCategory")
+  Users                  Users?                   @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Journals_Users")
+  PaperApprovalHistories PaperApprovalHistories[]
+  PaperApprovals         PaperApprovals[]
+  PaperGroups            PaperGroups[]
 }

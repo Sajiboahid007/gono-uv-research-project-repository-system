@@ -15,6 +15,9 @@ router.get(
   async (_req: AuthenticatedRequest, res) => {
     try {
       const paperApprovals = await prisma.paperApprovals.findMany({
+        where: {
+          Status: "Pending"
+        },
         orderBy: {
           Id: "desc",
         },
