@@ -64,6 +64,22 @@ router.get('/journal/getTotal', async (_req: AuthenticatedRequest, res) => {
     }
 })
 
+router.get('/journal/getById/:id', authenticate, async (req: AuthenticatedRequest, res) => {
+    try {
+        const id = Number(req.params.id);
+        const journal = await prisma.journals.findUnique({
+            where: {
+                Id: id,
+                IsMarkToDelete: false
+            },
+        });
+
+        res.json({ data: journal, message: "Journal retrieved successfully" });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+})
+
 router.get(
     "/journal/getByUserId/:id",
     authenticate,
@@ -134,7 +150,6 @@ router.post(
                 CategoryId,
                 SubcategoryId,
                 Name,
-                Authors,
                 Affiliation,
                 Keywords,
                 AuthorDeclaration,
@@ -144,7 +159,7 @@ router.post(
                 Year,
                 FileUrl,
             } = req.body;
-            const TeacherIds = req?.body;
+            const TeacherIds = req.body.authorsIds || [];
             const userId = req.userId;
 
             const result = await prisma.$transaction(async (tx) => {
@@ -155,9 +170,8 @@ router.post(
                         Abstract,
                         UserId: Number(userId),
                         CategoryId: Number(CategoryId),
-                        SubcategoryId: Number(SubcategoryId),
+                        SubcategoryId: SubcategoryId ? Number(SubcategoryId) : null,
                         Name,
-                        Authors,
                         Affiliation,
                         Keywords,
                         AuthorDeclaration,

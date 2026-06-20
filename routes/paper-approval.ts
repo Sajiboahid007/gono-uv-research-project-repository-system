@@ -117,4 +117,57 @@ router.post(
   },
 );
 
+router.post(
+  "/journal-approval/update",
+  authenticate,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { JournalId, Status, Remarks } = req.body;
+
+      const journalApproval = await prisma.paperApprovals.findFirst({
+        where: {
+          JournalId: Number(JournalId),
+        },
+      });
+
+      if (!journalApproval) {
+        return res.status(404).json({ error: "Journal approval not found" });
+      }
+
+      const result = await prisma.$transaction(async (tx) => {
+        const updatedJournalApproval = await tx.paperApprovals.update({
+          where: {
+            Id: journalApproval.Id,
+          },
+          data: {
+            Status,
+            Remarks,
+            UpdatedBy: req.userEmail || "Unknown",
+          },
+        });
+
+        await tx.paperApprovalHistories.create({
+          data: {
+            JournalId: Number(JournalId),
+            PaperApprovalId: journalApproval.Id,
+            Status,
+            Remarks,
+            ApprovedByUser: req.userEmail || "Unknown",
+            CreatedBy: req.userEmail || "Unknown",
+          },
+        });
+
+        return updatedJournalApproval;
+      });
+
+      return res.status(200).json({
+        data: result,
+        message: "Paper approval updated successfully",
+      });
+    } catch (error) {
+      return res.status(500).json({ error: error });
+    }
+  },
+);
+
 module.exports = router;
