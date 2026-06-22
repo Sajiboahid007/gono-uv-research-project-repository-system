@@ -41,6 +41,11 @@ router.get('/journal/get', authenticate, async (_req: AuthenticatedRequest, res)
                     select: {
                         UserId: true,
                         UserType: true,
+                        Users: {
+                            select: {
+                                Name: true,
+                            }
+                        }
                     },
                 },
             },
@@ -116,6 +121,7 @@ router.get(
                             UserId: true,
                             UserType: true,
                         },
+
                     },
                     PaperApprovals: {
                         select: {
@@ -131,7 +137,7 @@ router.get(
 
             res.json({
                 data: journals,
-                message: "Fail to get journals",
+                message: "Successfully get journals",
             });
         } catch (error) {
             res.status(500).json({ error: error });
