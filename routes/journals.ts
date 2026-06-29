@@ -69,6 +69,27 @@ router.get('/journal/getTotal', async (_req: AuthenticatedRequest, res) => {
     }
 })
 
+router.get('/keyword/get', authenticate, async (_req: AuthenticatedRequest, res) => {
+    try {
+        const journal = await prisma.journals.findMany({
+            where: {
+                IsMarkToDelete: false,
+            },
+            orderBy: {
+                Id: "desc",
+            },
+            select: {
+                Keywords: true,
+            },
+        });
+        const distinctKeywords = [...new Set(journal.map(j => j.Keywords).filter(Boolean))];
+        console.log("distinctKeywords", distinctKeywords)
+        res.json({ data: distinctKeywords, message: "Keywords retrieved successfully" });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+})
+
 router.get('/journal/getById/:id', authenticate, async (req: AuthenticatedRequest, res) => {
     try {
         const id = Number(req.params.id);

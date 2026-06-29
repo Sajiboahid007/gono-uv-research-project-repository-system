@@ -2,6 +2,7 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { AuthenticatedRequest } from "../interface";
 import { authenticate } from "../authenticate";
+import { GRPConfig } from "../GRPConfig";
 // import { authenticate } from "../authenticate";
 // import { AuthenticatedRequest } from "../interface";
 // import { GRPConfig } from "../GRPConfig";
@@ -122,7 +123,8 @@ router.post(
   authenticate,
   async (req: AuthenticatedRequest, res) => {
     try {
-      const { JournalId, Status, Remarks } = req.body;
+      const { JournalId, Status, Remarks, EditorialId } = req.body;
+
 
       const journalApproval = await prisma.paperApprovals.findFirst({
         where: {
@@ -145,6 +147,17 @@ router.post(
             UpdatedBy: req.userEmail || "Unknown",
           },
         });
+
+        for (const editorial of EditorialId) {
+          await tx.paperGroups.create({
+            data: {
+              JournalId: updatedJournalApproval.Id,
+              UserId: Number(editorial),
+              UserType: GRPConfig.RoleName.Teacher,
+              CreatedBy: req.userEmail || "Unknown",
+            },
+          });
+        }
 
         await tx.paperApprovalHistories.create({
           data: {
