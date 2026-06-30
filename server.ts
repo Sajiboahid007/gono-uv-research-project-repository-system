@@ -22,6 +22,7 @@ const papers = require("./routes/papers");
 const upload = require("./routes/upload");
 const paperApproval = require("./routes/paper-approval");
 const journals = require("./routes/journals");
+const home = require("./routes/home");
 
 app.use("/api", userRouter);
 app.use("/api", loginRouter);
@@ -34,6 +35,7 @@ app.use("/api", papers);
 app.use("/api", upload);
 app.use("/api", paperApproval);
 app.use("/api", journals);
+app.use("/api", home);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
 app.get("/openapi.json", (_req, res) => {

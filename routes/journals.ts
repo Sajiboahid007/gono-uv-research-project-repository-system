@@ -35,6 +35,7 @@ router.get('/journal/get', authenticate, async (_req: AuthenticatedRequest, res)
                 PaperApprovals: {
                     select: {
                         Status: true,
+                        Remarks: true
                     },
                 },
                 PaperGroups: {
