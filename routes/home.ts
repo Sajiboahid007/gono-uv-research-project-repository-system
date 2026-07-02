@@ -200,5 +200,90 @@ router.get('/home/journal/get', async (_req, res) => {
     }
 })
 
+router.get('/home/category/get', async (_, res) => {
+    try {
+        const categories = await prisma.category.findMany({
+            where: {
+                IsMarkToDelete: false,
+            },
+            orderBy: {
+                Id: "desc",
+            },
+        })
+        res.json({ data: categories, message: "Categories retrieved successfully" })
+    } catch (error: any) {
+        res.status(500).json({ error: error.message })
+    }
+})
+
+router.get('/home/subcategory/get', async (_, res) => {
+    try {
+        const subCategories = await prisma.subCategory.findMany({
+            where: {
+                IsMarkToDelete: false,
+            },
+            orderBy: {
+                Id: "desc",
+            },
+        })
+        res.json({ data: subCategories, message: "Sub Categories retrieved successfully" })
+    } catch (error: any) {
+        res.status(500).json({ error: error.message })
+    }
+})
+
+router.get('/home/department/get', async (_req, res) => {
+    try {
+        const departments = await prisma.department.findMany({
+            where: {
+                IsMarkToDelete: false,
+            },
+            orderBy: {
+                Id: "desc",
+            },
+        })
+        res.json({ data: departments, message: "Departments retrieved successfully" })
+    } catch (error: any) {
+        res.status(500).json({ error: error.message })
+    }
+})
+
+
+router.get("/author/get/all", async (_req, res) => {
+    try {
+        const users = await prisma.users.findMany({
+            where: {
+                IsMarkToDelete: false,
+                Roles: {
+                    is: {
+                        Name: {
+                            in: ["Teacher", "Admin", "SuperAdmin"]
+                        }
+                    }
+                },
+            },
+            orderBy: {
+                Name: "asc",
+            },
+            select: {
+                Name: true,
+                ImageUrl: true,
+            },
+        });
+
+        const distinctAuthors = [
+            ...new Set(users.map((u) => u.Name).filter(Boolean)),
+        ];
+
+        res.json({
+            data: distinctAuthors,
+            message: "Authors retrieved successfully",
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
 
 module.exports = router;

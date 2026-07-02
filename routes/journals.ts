@@ -84,12 +84,46 @@ router.get('/keyword/get', authenticate, async (_req: AuthenticatedRequest, res)
             },
         });
         const distinctKeywords = [...new Set(journal.map(j => j.Keywords).filter(Boolean))];
-        console.log("distinctKeywords", distinctKeywords)
         res.json({ data: distinctKeywords, message: "Keywords retrieved successfully" });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
 })
+
+router.get("/author/get", authenticate, async (_req: AuthenticatedRequest, res) => {
+    try {
+        const users = await prisma.users.findMany({
+            where: {
+                IsMarkToDelete: false,
+                Roles: {
+                    is: {
+                        Name: {
+                            in: ["Teacher", "Admin", "Super-Admin"]
+                        }
+                    }
+                },
+            },
+            orderBy: {
+                Name: "asc",
+            },
+            select: {
+                Name: true,
+                ImageUrl: true,
+            },
+        });
+
+        const distinctAuthors = [
+            ...new Set(users.map((u) => u.Name).filter(Boolean)),
+        ];
+
+        res.json({
+            data: distinctAuthors,
+            message: "Authors retrieved successfully",
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 router.get('/journal/getById/:id', authenticate, async (req: AuthenticatedRequest, res) => {
     try {

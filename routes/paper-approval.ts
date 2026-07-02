@@ -151,7 +151,7 @@ router.post(
         for (const editorial of EditorialId) {
           await tx.paperGroups.create({
             data: {
-              JournalId: updatedJournalApproval.Id,
+              JournalId: Number(JournalId),
               UserId: Number(editorial),
               UserType: GRPConfig.RoleName.Teacher,
               CreatedBy: req.userEmail || "Unknown",
