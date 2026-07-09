@@ -11,6 +11,11 @@ router.get('/home/get', async (_req, res) => {
             prisma.journals.findMany({
                 where: {
                     IsMarkToDelete: false,
+                    PaperApprovals: {
+                        some: {
+                            Status: "Approved",
+                        },
+                    },
                 },
                 orderBy: {
                     Id: "desc",
@@ -32,6 +37,9 @@ router.get('/home/get', async (_req, res) => {
                         },
                     },
                     PaperApprovals: {
+                        where: {
+                            Status: "Approved"
+                        },
                         select: {
                             Status: true,
                             Remarks: true
@@ -53,6 +61,11 @@ router.get('/home/get', async (_req, res) => {
             prisma.papers.findMany({
                 where: {
                     IsMarkToDelete: false,
+                    PaperApprovals: {
+                        some: {
+                            Status: "Approved",
+                        },
+                    },
                 },
                 orderBy: {
                     Id: "desc",
@@ -74,6 +87,9 @@ router.get('/home/get', async (_req, res) => {
                         },
                     },
                     PaperApprovals: {
+                        where: {
+                            Status: "Approved"
+                        },
                         select: {
                             Status: true,
                             Remarks: true
@@ -105,6 +121,11 @@ router.get("/home/papers/get", async (_req, res) => {
         const papers = await prisma.papers.findMany({
             where: {
                 IsMarkToDelete: false,
+                PaperApprovals: {
+                    some: {
+                        Status: "Approved",
+                    },
+                },
             },
             orderBy: {
                 Id: "desc",
@@ -126,6 +147,9 @@ router.get("/home/papers/get", async (_req, res) => {
                     },
                 },
                 PaperApprovals: {
+                    where: {
+                        Status: "Approved"
+                    },
                     select: {
                         Status: true,
                         Remarks: true
@@ -155,6 +179,11 @@ router.get('/home/journal/get', async (_req, res) => {
         const journals = await prisma.journals.findMany({
             where: {
                 IsMarkToDelete: false,
+                PaperApprovals: {
+                    some: {
+                        Status: "Approved",
+                    },
+                },
             },
             orderBy: {
                 Id: "desc",
@@ -176,6 +205,9 @@ router.get('/home/journal/get', async (_req, res) => {
                     },
                 },
                 PaperApprovals: {
+                    where: {
+                        Status: "Approved"
+                    },
                     select: {
                         Status: true,
                         Remarks: true
@@ -272,7 +304,7 @@ router.get("/author/get/all", async (_req, res) => {
         });
 
         const distinctAuthors = [
-            ...new Set(users.map((u) => u.Name).filter(Boolean)),
+            ...new Set(users.map((u: any) => u.Name).filter(Boolean)),
         ];
 
         res.json({
@@ -285,5 +317,67 @@ router.get("/author/get/all", async (_req, res) => {
 });
 
 
+router.get(
+    "/paper/getPapersBynewId/:id",
+    async (req, res) => {
+        try {
+            const id = Number(req.params.id);
+            const papers = await prisma.papers.findMany({
+                where: {
+                    UserId: id,
+                    IsMarkToDelete: false,
+                },
+                orderBy: {
+                    Id: "desc", // or CreatedAt: "desc"
+                },
+                include: {
+                    Category: {
+                        select: {
+                            Name: true,
+                        },
+                    },
+                    SubCategory: {
+                        select: {
+                            Name: true,
+                        },
+                    },
+                    Department: {
+                        select: {
+                            Name: true,
+                        },
+                    },
+                    Batches: {
+                        select: {
+                            Name: true,
+                        },
+                    },
+                    PaperGroups: {
+                        select: {
+                            Id: true,
+                            UserId: true,
+                            UserType: true,
+                        },
+                    },
+                    PaperApprovals: {
+                        select: {
+                            Id: true,
+                            Status: true,
+                            Remarks: true,
+                            ApprovedByUserId: true,
+                            ApprovedDate: true,
+                        },
+                    },
+                },
+            });
+
+            res.json({
+                data: papers,
+                message: "Successfully get papers",
+            });
+        } catch (error) {
+            res.status(500).json({ error: error });
+        }
+    },
+);
 
 module.exports = router;

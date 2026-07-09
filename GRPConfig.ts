@@ -20,4 +20,10 @@ export class GRPConfig {
     Approved: "Approved",
     Rejected: "Rejected",
   } as const;
+
+  public static readonly mailConfig = {
+    userEmail: "gono.no.response@gmail.com",
+    userPass: "djyl smdu lysx bdny"
+
+  } as const;
 }

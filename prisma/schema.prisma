@@ -42,6 +42,7 @@ model Users {
   PaperApprovals PaperApprovals[]
   PaperGroups    PaperGroups[]
   Papers         Papers[]
+  ResearchPosts  ResearchPosts[]
   Batches        Batches?         @relation(fields: [BatchId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Users_Batches")
   Department     Department       @relation(fields: [DepartmentId], references: [Id], onUpdate: NoAction, map: "FK_Users_Department")
   Roles          Roles?           @relation(fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Users_Roles")
@@ -203,4 +204,18 @@ model Journals {
   PaperApprovalHistories PaperApprovalHistories[]
   PaperApprovals         PaperApprovals[]
   PaperGroups            PaperGroups[]
+}
+
+model ResearchPosts {
+  Id           Int       @id(map: "PK__Research__3214EC07A6223A12") @default(autoincrement())
+  UserId       Int
+  Title        String    @db.NVarChar(200)
+  Abstract     String    @db.NVarChar(Max)
+  ResearchArea String?   @db.NVarChar(100)
+  Status       String?   @db.NVarChar(20)
+  CreatedBy    String?   @db.NVarChar(200)
+  UpdatedBy    String?   @db.NVarChar(200)
+  CreatedAt    DateTime  @default(now(), map: "DF__ResearchP__Creat__2EA5EC27")
+  UpdatedAt    DateTime?
+  Users        Users     @relation(fields: [UserId], references: [Id], onUpdate: NoAction, map: "FK_ResearchPosts_User")
 }

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express = require("express");
 import cors = require("cors");
 import swaggerUi from "swagger-ui-express";
@@ -23,6 +24,8 @@ const upload = require("./routes/upload");
 const paperApproval = require("./routes/paper-approval");
 const journals = require("./routes/journals");
 const home = require("./routes/home");
+const email = require("./routes/email");
+const bot = require("./routes/bot");
 
 app.use("/api", userRouter);
 app.use("/api", loginRouter);
@@ -36,6 +39,9 @@ app.use("/api", upload);
 app.use("/api", paperApproval);
 app.use("/api", journals);
 app.use("/api", home);
+app.use("/api", email)
+app.use("/api", bot)
+
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
 app.get("/openapi.json", (_req, res) => {

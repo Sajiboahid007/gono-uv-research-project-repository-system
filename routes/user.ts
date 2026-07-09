@@ -39,7 +39,7 @@ router.get(
         },
       });
 
-      const usersWithoutPasswords = users.map(({ Password, ...user }) => user);
+      const usersWithoutPasswords = users.map(({ Password, ...user }: any) => user);
       res.json({
         data: usersWithoutPasswords,
         message: "Users retrieved successfully",
@@ -75,7 +75,7 @@ router.get(
         },
       });
 
-      const usersWithoutPasswords = users.map(({ Password, ...user }) => user);
+      const usersWithoutPasswords = users.map(({ Password, ...user }: any) => user);
       res.json({
         data: usersWithoutPasswords,
         message: "Users retrieved successfully",

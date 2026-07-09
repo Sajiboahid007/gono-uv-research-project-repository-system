@@ -82,7 +82,7 @@ router.post(
         return res.status(404).json({ error: "Paper approval not found" });
       }
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: any) => {
         const updatedPaperApproval = await tx.paperApprovals.update({
           where: {
             Id: paperApproval.Id,
@@ -136,7 +136,7 @@ router.post(
         return res.status(404).json({ error: "Journal approval not found" });
       }
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: any) => {
         const updatedJournalApproval = await tx.paperApprovals.update({
           where: {
             Id: journalApproval.Id,

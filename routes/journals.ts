@@ -12,6 +12,69 @@ router.get('/journal/get', authenticate, async (_req: AuthenticatedRequest, res)
         const journals = await prisma.journals.findMany({
             where: {
                 IsMarkToDelete: false,
+                PaperApprovals: {
+                    some: {
+                        Status: "Approved",
+                    },
+                },
+            },
+            orderBy: {
+                Id: "desc",
+            },
+            include: {
+                Category: {
+                    select: {
+                        Name: true,
+                    },
+                },
+                SubCategory: {
+                    select: {
+                        Name: true,
+                    },
+                },
+                Users: {
+                    select: {
+                        Name: true,
+                    },
+                },
+                PaperApprovals: {
+                    where: {
+                        Status: "Approved"
+                    },
+                    select: {
+                        Status: true,
+                        Remarks: true
+                    },
+                },
+                PaperGroups: {
+                    select: {
+                        UserId: true,
+                        UserType: true,
+                        Users: {
+                            select: {
+                                Name: true,
+                            }
+                        }
+                    },
+                },
+            },
+        });
+        res.json({ data: journals, message: "Journals retrieved successfully" });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+})
+
+router.get('/journal/non_approved/get', authenticate, async (_req: AuthenticatedRequest, res) => {
+    try {
+        const journals = await prisma.journals.findMany({
+            where: {
+                IsMarkToDelete: false,
+                PaperApprovals: {
+                    none: {
+                        Status: "Approved",
+                    },
+                },
             },
             orderBy: {
                 Id: "desc",
@@ -83,7 +146,7 @@ router.get('/keyword/get', authenticate, async (_req: AuthenticatedRequest, res)
                 Keywords: true,
             },
         });
-        const distinctKeywords = [...new Set(journal.map(j => j.Keywords).filter(Boolean))];
+        const distinctKeywords = [...new Set(journal.map((j: any) => j.Keywords).filter(Boolean))];
         res.json({ data: distinctKeywords, message: "Keywords retrieved successfully" });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -113,7 +176,7 @@ router.get("/author/get", authenticate, async (_req: AuthenticatedRequest, res) 
         });
 
         const distinctAuthors = [
-            ...new Set(users.map((u) => u.Name).filter(Boolean)),
+            ...new Set(users.map((u: any) => u.Name).filter(Boolean)),
         ];
 
         res.json({
@@ -149,11 +212,81 @@ router.get(
             const id = Number(req.params.id);
             const journals = await prisma.journals.findMany({
                 where: {
+                    IsMarkToDelete: false,
+                    PaperApprovals: {
+                        none: {
+                            Status: "Approved",
+                        },
+                    },
                     PaperGroups: {
                         some: {
                             UserId: id,
                         },
                     },
+
+                },
+                orderBy: {
+                    Id: "desc", // or CreatedAt: "desc"
+                },
+                include: {
+                    Category: {
+                        select: {
+                            Name: true,
+                        },
+                    },
+                    SubCategory: {
+                        select: {
+                            Name: true,
+                        },
+                    },
+                    Users: {
+                        select: {
+                            Name: true,
+                        },
+                    },
+                    PaperGroups: {
+                        select: {
+                            Id: true,
+                            UserId: true,
+                            UserType: true,
+                        },
+
+                    },
+                    PaperApprovals: {
+                        select: {
+                            Id: true,
+                            Status: true,
+                            Remarks: true,
+                            ApprovedByUserId: true,
+                            ApprovedDate: true,
+                        },
+                    },
+                },
+            });
+
+            res.json({
+                data: journals,
+                message: "Successfully get journals",
+            });
+        } catch (error) {
+            res.status(500).json({ error: error });
+        }
+    },
+);
+
+router.get(
+    "/journal/getJournalByUserId/:id",
+    authenticate,
+    async (req: AuthenticatedRequest, res) => {
+        try {
+            const id = Number(req.params.id);
+            const journals = await prisma.journals.findMany({
+                where: {
+                    UserId: id,
+                    IsMarkToDelete: false,
+                },
+                orderBy: {
+                    Id: "desc", // or CreatedAt: "desc"
                 },
                 include: {
                     Category: {
@@ -209,6 +342,7 @@ router.post(
             const {
                 Title,
                 Abstract,
+                Authors,
                 CategoryId,
                 SubcategoryId,
                 Name,
@@ -224,12 +358,13 @@ router.post(
             const TeacherIds = req.body.authorsIds || [];
             const userId = req.userId;
 
-            const result = await prisma.$transaction(async (tx) => {
+            const result = await prisma.$transaction(async (tx: any) => {
                 // Create Journal
                 const createJournal = await tx.journals.create({
                     data: {
                         Title,
                         Abstract,
+                        Authors,
                         UserId: Number(userId),
                         CategoryId: Number(CategoryId),
                         SubcategoryId: SubcategoryId ? Number(SubcategoryId) : null,
@@ -336,14 +471,14 @@ router.put(
 )
 
 router.put(
-    "/journal/delete",
+    "/journal/delete/:id",
     authenticate,
     async (req: AuthenticatedRequest, res) => {
         try {
-            const { Id } = req.body;
+            const id = Number(req.params.id);
             const result = await prisma.journals.update({
                 where: {
-                    Id,
+                    Id: id,
                     IsMarkToDelete: false,
                 },
                 data: {
@@ -362,5 +497,70 @@ router.put(
         }
     }
 )
+
+router.get(
+    "/journal/getByUserIdforProfile/:id",
+    authenticate,
+    async (req: AuthenticatedRequest, res) => {
+        try {
+            const id = Number(req.params.id);
+            const journals = await prisma.journals.findMany({
+                where: {
+                    IsMarkToDelete: false,
+                    PaperGroups: {
+                        some: {
+                            UserId: id,
+                        },
+                    },
+
+                },
+                orderBy: {
+                    Id: "desc", // or CreatedAt: "desc"
+                },
+                include: {
+                    Category: {
+                        select: {
+                            Name: true,
+                        },
+                    },
+                    SubCategory: {
+                        select: {
+                            Name: true,
+                        },
+                    },
+                    Users: {
+                        select: {
+                            Name: true,
+                        },
+                    },
+                    PaperGroups: {
+                        select: {
+                            Id: true,
+                            UserId: true,
+                            UserType: true,
+                        },
+
+                    },
+                    PaperApprovals: {
+                        select: {
+                            Id: true,
+                            Status: true,
+                            Remarks: true,
+                            ApprovedByUserId: true,
+                            ApprovedDate: true,
+                        },
+                    },
+                },
+            });
+
+            res.json({
+                data: journals,
+                message: "Successfully get journals",
+            });
+        } catch (error) {
+            res.status(500).json({ error: error });
+        }
+    },
+);
 
 module.exports = router;

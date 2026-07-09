@@ -15,6 +15,79 @@ router.get(
       const getPapers = await prisma.papers.findMany({
         where: {
           IsMarkToDelete: false,
+          PaperApprovals: {
+            some: {
+              Status: "Approved",
+            },
+          },
+        },
+        orderBy: {
+          Id: "desc",
+        },
+        include: {
+          Category: {
+            select: {
+              Name: true,
+            },
+          },
+          SubCategory: {
+            select: {
+              Name: true,
+            },
+          },
+          Department: {
+            select: {
+              Name: true,
+            },
+          },
+          Batches: {
+            select: {
+              Name: true,
+            },
+          },
+          Users: {
+            select: {
+              Name: true,
+            },
+          },
+          PaperApprovals: {
+            where: {
+              Status: "Approved"
+            },
+            select: {
+              Status: true,
+            },
+          },
+          PaperGroups: {
+            select: {
+              UserId: true,
+              UserType: true,
+            },
+          },
+        },
+      });
+      res.json({
+        data: getPapers,
+        message: "Success to get papers",
+      });
+    } catch (error) {
+      res.status(500).json({ error: error });
+    }
+  },
+);
+router.get(
+  "/paper/non_approval/get",
+  authenticate,
+  async (_req: AuthenticatedRequest, res) => {
+    try {
+      const getPapers = await prisma.papers.findMany({
+        where: {
+          IsMarkToDelete: false,
+          PaperApprovals: {
+            none: {
+              Status: "Approved",
+            },
+          },
         },
         orderBy: {
           Id: "desc",
@@ -181,7 +254,7 @@ router.post(
       let userId = req.userId;
 
       // Start interactive transaction
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: any) => {
         // 1. Create the paper
         const createPapers = await tx.papers.create({
           data: {
@@ -361,11 +434,155 @@ router.get(
       const id = Number(req.params.id);
       const papers = await prisma.papers.findMany({
         where: {
+          IsMarkToDelete: false,
+          PaperApprovals: {
+            none: {
+              Status: "Approved",
+            },
+          },
           PaperGroups: {
             some: {
               UserId: id,
             },
           },
+
+        },
+        orderBy: {
+          Id: "desc", // or CreatedAt: "desc"
+        },
+        include: {
+          Category: {
+            select: {
+              Name: true,
+            },
+          },
+          SubCategory: {
+            select: {
+              Name: true,
+            },
+          },
+          Department: {
+            select: {
+              Name: true,
+            },
+          },
+          Batches: {
+            select: {
+              Name: true,
+            },
+          },
+          PaperGroups: {
+            select: {
+              Id: true,
+              UserId: true,
+              UserType: true,
+            },
+          },
+          PaperApprovals: {
+            select: {
+              Id: true,
+              Status: true,
+              Remarks: true,
+              ApprovedByUserId: true,
+              ApprovedDate: true,
+            },
+          },
+        },
+      });
+
+      res.json({
+        data: papers,
+        message: "Successfully get papers",
+      });
+    } catch (error) {
+      res.status(500).json({ error: error });
+    }
+  },
+);
+
+router.get(
+  "/paper/getPapersById/:id",
+  authenticate,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const id = Number(req.params.id);
+      const papers = await prisma.papers.findMany({
+        where: {
+          UserId: id,
+          IsMarkToDelete: false,
+        },
+        orderBy: {
+          Id: "desc", // or CreatedAt: "desc"
+        },
+        include: {
+          Category: {
+            select: {
+              Name: true,
+            },
+          },
+          SubCategory: {
+            select: {
+              Name: true,
+            },
+          },
+          Department: {
+            select: {
+              Name: true,
+            },
+          },
+          Batches: {
+            select: {
+              Name: true,
+            },
+          },
+          PaperGroups: {
+            select: {
+              Id: true,
+              UserId: true,
+              UserType: true,
+            },
+          },
+          PaperApprovals: {
+            select: {
+              Id: true,
+              Status: true,
+              Remarks: true,
+              ApprovedByUserId: true,
+              ApprovedDate: true,
+            },
+          },
+        },
+      });
+
+      res.json({
+        data: papers,
+        message: "Successfully get papers",
+      });
+    } catch (error) {
+      res.status(500).json({ error: error });
+    }
+  },
+);
+
+
+router.get(
+  "/paper/getPapersByUserIdforProfile/:id",
+  authenticate,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const id = Number(req.params.id);
+      const papers = await prisma.papers.findMany({
+        where: {
+          IsMarkToDelete: false,
+          PaperGroups: {
+            some: {
+              UserId: id,
+            },
+          },
+
+        },
+        orderBy: {
+          Id: "desc", // or CreatedAt: "desc"
         },
         include: {
           Category: {
