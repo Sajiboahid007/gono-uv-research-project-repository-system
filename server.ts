@@ -26,6 +26,8 @@ const journals = require("./routes/journals");
 const home = require("./routes/home");
 const email = require("./routes/email");
 const bot = require("./routes/bot");
+const notification = require("./routes/notification");
+const paperGroup = require("./routes/paper-group");
 
 app.use("/api", userRouter);
 app.use("/api", loginRouter);
@@ -39,8 +41,10 @@ app.use("/api", upload);
 app.use("/api", paperApproval);
 app.use("/api", journals);
 app.use("/api", home);
-app.use("/api", email)
-app.use("/api", bot)
+app.use("/api", email);
+app.use("/api", bot);
+app.use("/api", notification);
+app.use("/api", paperGroup);
 
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));

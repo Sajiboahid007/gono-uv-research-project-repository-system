@@ -3,9 +3,6 @@ import { PrismaClient } from "@prisma/client";
 import { AuthenticatedRequest } from "../interface";
 import { authenticate } from "../authenticate";
 import { GRPConfig } from "../GRPConfig";
-// import { authenticate } from "../authenticate";
-// import { AuthenticatedRequest } from "../interface";
-// import { GRPConfig } from "../GRPConfig";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -70,7 +67,7 @@ router.post(
   authenticate,
   async (req: AuthenticatedRequest, res) => {
     try {
-      const { PaperId, Status, Remarks } = req.body;
+      const { PaperId, Status, Remarks, RemarksFile, IsResubmission } = req.body;
 
       const paperApproval = await prisma.paperApprovals.findFirst({
         where: {
@@ -90,6 +87,8 @@ router.post(
           data: {
             Status,
             Remarks,
+            RemarksFile,
+            IsResubmission: IsResubmission === true || IsResubmission === "true",
             UpdatedBy: req.userEmail || "Unknown",
           },
         });
@@ -104,6 +103,36 @@ router.post(
             CreatedBy: req.userEmail || "Unknown",
           },
         });
+
+        // Auto-generate notification for the paper author
+        const paper = await tx.papers.findUnique({
+          where: { Id: Number(PaperId) },
+          include: { Users: true }
+        });
+        if (paper && paper.UserId) {
+          if (Status === "Pending" && paperApproval.Status !== "Pending") {
+            const submittedBy = paper.Users?.Name || "Unknown User";
+            const notificationRouter = require("./notification");
+            await notificationRouter.createPendingNotifications(tx, {
+              paperId: paper.Id,
+              title: paper.Title || "Untitled Paper",
+              submittedBy,
+            });
+          }
+
+          if (req.userId !== paper.UserId) {
+            await tx.notifications.create({
+              data: {
+                UserId: paper.UserId,
+                Title: "Paper Approval Status Updated",
+                Message: `Your paper "${paper.Title}" has been updated to "${Status}". Remarks: ${Remarks}`,
+                Status,
+                FileUrl: RemarksFile || null,
+                PaperId: paper.Id,
+              }
+            });
+          }
+        }
 
         return updatedPaperApproval;
       });
@@ -123,7 +152,7 @@ router.post(
   authenticate,
   async (req: AuthenticatedRequest, res) => {
     try {
-      const { JournalId, Status, Remarks, EditorialId } = req.body;
+      const { JournalId, Status, Remarks, EditorialId, RemarksFile, IsResubmission } = req.body;
 
 
       const journalApproval = await prisma.paperApprovals.findFirst({
@@ -137,6 +166,12 @@ router.post(
       }
 
       const result = await prisma.$transaction(async (tx: any) => {
+        // Query journal first to get its Title for reviewer notifications
+        const journal = await tx.journals.findUnique({
+          where: { Id: Number(JournalId) },
+          include: { Users: true }
+        });
+
         const updatedJournalApproval = await tx.paperApprovals.update({
           where: {
             Id: journalApproval.Id,
@@ -144,19 +179,34 @@ router.post(
           data: {
             Status,
             Remarks,
+            RemarksFile,
+            IsResubmission: IsResubmission === true || IsResubmission === "true",
             UpdatedBy: req.userEmail || "Unknown",
           },
         });
 
-        for (const editorial of EditorialId) {
-          await tx.paperGroups.create({
-            data: {
-              JournalId: Number(JournalId),
-              UserId: Number(editorial),
-              UserType: GRPConfig.RoleName.Teacher,
-              CreatedBy: req.userEmail || "Unknown",
-            },
-          });
+        if (EditorialId && Array.isArray(EditorialId)) {
+          for (const editorial of EditorialId) {
+            await tx.paperGroups.create({
+              data: {
+                JournalId: Number(JournalId),
+                UserId: Number(editorial),
+                UserType: GRPConfig.RoleName.Reviewer,
+                CreatedBy: req.userEmail || "Unknown",
+              },
+            });
+
+            // Notify each reviewer assigned
+            await tx.notifications.create({
+              data: {
+                UserId: Number(editorial),
+                Title: "New Journal Assigned for Review",
+                Message: `You have been assigned to review the journal "${journal?.Title || 'Untitled Journal'}"`,
+                Status: "Pending",
+                JournalId: Number(JournalId),
+              },
+            });
+          }
         }
 
         await tx.paperApprovalHistories.create({
@@ -170,12 +220,38 @@ router.post(
           },
         });
 
+        // Auto-generate notification for the journal author
+        if (journal && journal.UserId) {
+          if (Status === "Pending" && journalApproval.Status !== "Pending") {
+            const submittedBy = journal.Users?.Name || "Unknown User";
+            const notificationRouter = require("./notification");
+            await notificationRouter.createPendingNotifications(tx, {
+              journalId: journal.Id,
+              title: journal.Title || "Untitled Journal",
+              submittedBy,
+            });
+          }
+
+          if (req.userId !== journal.UserId) {
+            await tx.notifications.create({
+              data: {
+                UserId: journal.UserId,
+                Title: "Journal Approval Status Updated",
+                Message: `Your journal "${journal.Title}" has been updated to "${Status}". Remarks: ${Remarks}`,
+                Status,
+                FileUrl: RemarksFile || null,
+                JournalId: journal.Id,
+              }
+            });
+          }
+        }
+
         return updatedJournalApproval;
       });
 
       return res.status(200).json({
         data: result,
-        message: "Paper approval updated successfully",
+        message: "Journal approval updated successfully",
       });
     } catch (error) {
       return res.status(500).json({ error: error });

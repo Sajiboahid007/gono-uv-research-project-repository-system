@@ -434,7 +434,7 @@ router.put(
     async (req: AuthenticatedRequest, res) => {
         try {
             const id = Number(req.params.id);
-            const { Title, Abstract, CategoryId, SubcategoryId, Name, Authors, Affiliation, Keywords, AuthorDeclaration, Volume, IssueNumber, DOI, Year, FileUrl } = req.body;
+            const { Title, Abstract, CategoryId, SubcategoryId, Name, Authors, Affiliation, Keywords, AuthorDeclaration, Volume, IssueNumber, DOI, Year, FileUrl, ResponseLater } = req.body;
             const result = await prisma.journals.update({
                 where: {
                     Id: id,
@@ -454,6 +454,7 @@ router.put(
                     IssueNumber,
                     DOI,
                     Year,
+                    ResponseLater,
                     FileUrl,
                     UpdatedBy: req.userEmail || "Unknown",
                 },

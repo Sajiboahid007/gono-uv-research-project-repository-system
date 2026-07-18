@@ -12,6 +12,7 @@ export class GRPConfig {
   public static readonly RoleName = {
     Student: "Student",
     Teacher: "Teacher",
+    Reviewer: "Reviewer"
   } as const;
 
   public static readonly ApprovalStatus = {

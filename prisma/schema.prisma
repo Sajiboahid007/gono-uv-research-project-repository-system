@@ -38,7 +38,9 @@ model Users {
   UpdatedAt      DateTime?        @db.DateTime
   BatchId        Int?
   ImageUrl       String?          @db.Text
+  IsEmailVerified Boolean?         @default(false)
   Journals       Journals[]
+  Notifications  Notifications[]
   PaperApprovals PaperApprovals[]
   PaperGroups    PaperGroups[]
   Papers         Papers[]
@@ -116,6 +118,8 @@ model Papers {
   CreatedBy              String?                  @db.VarChar(Max)
   UpdatedBy              String?                  @db.VarChar(Max)
   IsMarkToDelete         Boolean?                 @default(false, map: "DF__Papers__IsMarkTo__4D5F7D71")
+  Authors                String?                  @db.VarChar(Max)
+  Notifications          Notifications[]
   PaperApprovalHistories PaperApprovalHistories[]
   PaperApprovals         PaperApprovals[]
   PaperGroups            PaperGroups[]
@@ -139,6 +143,8 @@ model PaperApprovals {
   UpdatedBy              String?                  @db.Text
   IsMarkToDelete         Boolean?                 @default(false, map: "DF__PaperAppr__IsMar__65370702")
   JournalId              Int?
+  RemarksFile            String?                  @db.NVarChar(Max)
+  IsResubmission         Boolean                  @default(false, map: "DF__PaperAppr__IsRes__3FD07829")
   PaperApprovalHistories PaperApprovalHistories[]
   Users                  Users?                   @relation(fields: [ApprovedByUserId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__PaperAppr__Appro__671F4F74")
   Papers                 Papers?                  @relation(fields: [PaperId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK__PaperAppr__Paper__662B2B3B")
@@ -198,9 +204,11 @@ model Journals {
   CreatedBy              String?                  @db.VarChar(Max)
   UpdatedBy              String?                  @db.VarChar(Max)
   IsMarkToDelete         Boolean?                 @default(false, map: "DF__Journals__IsMark__1C873BEC")
+  ResponseLater          String?                  @db.VarChar(Max)
   Category               Category?                @relation(fields: [CategoryId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Journals_Category")
   SubCategory            SubCategory?             @relation(fields: [SubcategoryId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Journals_SubCategory")
   Users                  Users?                   @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Journals_Users")
+  Notifications          Notifications[]
   PaperApprovalHistories PaperApprovalHistories[]
   PaperApprovals         PaperApprovals[]
   PaperGroups            PaperGroups[]
@@ -218,4 +226,20 @@ model ResearchPosts {
   CreatedAt    DateTime  @default(now(), map: "DF__ResearchP__Creat__2EA5EC27")
   UpdatedAt    DateTime?
   Users        Users     @relation(fields: [UserId], references: [Id], onUpdate: NoAction, map: "FK_ResearchPosts_User")
+}
+
+model Notifications {
+  Id            Int       @id(map: "PK_Notifications") @default(autoincrement())
+  UserId        Int?
+  Title         String    @db.NVarChar(200)
+  Message       String    @db.NVarChar(Max)
+  Status        String?   @db.NVarChar(20)
+  FileUrl       String?   @db.NVarChar(Max)
+  CreatedAt     DateTime  @default(now(), map: "DF_Notifications_CreatedAt") @db.DateTime
+  JournalId     Int?
+  PaperId       Int?
+  RecipientRole String?   @db.NVarChar(50)
+  Journals      Journals? @relation(fields: [JournalId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Notifications_Journals")
+  Papers        Papers?   @relation(fields: [PaperId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Notifications_Papers")
+  Users         Users?    @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Notifications_Users")
 }

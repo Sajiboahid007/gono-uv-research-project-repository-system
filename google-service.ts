@@ -16,7 +16,20 @@ const ai = new GoogleGenAI({ apiKey });
 export async function reviewPaper(fileUri: string) {
     // Fetch file from url
     const responseFile = await fetch(fileUri);
+    if (!responseFile.ok) {
+        throw new Error(`Failed to fetch file from URL. HTTP Status: ${responseFile.status} ${responseFile.statusText}`);
+    }
+
+    const contentType = responseFile.headers.get("content-type") || "";
+    if (contentType && !contentType.includes("application/pdf") && !contentType.includes("application/octet-stream")) {
+        console.warn(`Warning: Content-Type is ${contentType}, expected application/pdf.`);
+    }
+
     const arrayBuffer = await responseFile.arrayBuffer();
+    if (arrayBuffer.byteLength === 0) {
+        throw new Error("The fetched document is empty (0 bytes) or could not be parsed.");
+    }
+
     const base64Data = Buffer.from(arrayBuffer).toString("base64");
 
     const response = await ai.models.generateContent({

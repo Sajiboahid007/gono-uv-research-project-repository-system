@@ -62,6 +62,11 @@ router.get(
             select: {
               UserId: true,
               UserType: true,
+              Users: {
+                select: {
+                  Name: true,
+                }
+              }
             },
           },
         },
@@ -75,6 +80,22 @@ router.get(
     }
   },
 );
+
+
+router.get('/papers/getTotal', async (_req: AuthenticatedRequest, res) => {
+  try {
+    const total = await prisma.papers.count({
+      where: {
+        IsMarkToDelete: false,
+      },
+    });
+    res.json({ data: total, message: "Total papers retrieved successfully" });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+})
+
+
 router.get(
   "/paper/non_approval/get",
   authenticate,
@@ -121,12 +142,19 @@ router.get(
           PaperApprovals: {
             select: {
               Status: true,
+              Remarks: true,
+              ApprovedDate: true,
             },
           },
           PaperGroups: {
             select: {
               UserId: true,
               UserType: true,
+              Users: {
+                select: {
+                  Name: true,
+                }
+              }
             },
           },
         },
@@ -151,6 +179,11 @@ router.get(
         select: {
           UserId: true,
           UserType: true,
+          Users: {
+            select: {
+              Name: true,
+            }
+          }
         },
       };
 
@@ -165,6 +198,11 @@ router.get(
           select: {
             UserId: true,
             UserType: true,
+            Users: {
+              select: {
+                Name: true,
+              }
+            }
           },
         };
       }
@@ -247,7 +285,7 @@ router.post(
   authenticate,
   async (req: AuthenticatedRequest, res) => {
     try {
-      const { Title, Abstract, Year, FileUrl } = req.body;
+      const { Title, Abstract, Authors, Year, FileUrl } = req.body;
       const { CategoryId, SubcategoryId, DepartmentId, BatchId } = req.body;
       const { StudentIds, TeacherIds } = req.body;
 
@@ -260,6 +298,7 @@ router.post(
           data: {
             Title,
             Abstract,
+            Authors,
             CategoryId: Number(CategoryId),
             SubcategoryId: Number(SubcategoryId),
             DepartmentId: Number(DepartmentId),
@@ -476,6 +515,11 @@ router.get(
               Id: true,
               UserId: true,
               UserType: true,
+              Users: {
+                select: {
+                  Name: true,
+                }
+              }
             },
           },
           PaperApprovals: {
@@ -540,6 +584,11 @@ router.get(
               Id: true,
               UserId: true,
               UserType: true,
+              Users: {
+                select: {
+                  Name: true,
+                }
+              }
             },
           },
           PaperApprovals: {
@@ -610,6 +659,11 @@ router.get(
               Id: true,
               UserId: true,
               UserType: true,
+              Users: {
+                select: {
+                  Name: true,
+                }
+              }
             },
           },
           PaperApprovals: {

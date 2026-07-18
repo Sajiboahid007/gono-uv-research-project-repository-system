@@ -81,6 +81,16 @@ router.get('/home/get', async (_req, res) => {
                             Name: true,
                         },
                     },
+                    Department: {
+                        select: {
+                            Name: true,
+                        },
+                    },
+                    Batches: {
+                        select: {
+                            Name: true,
+                        },
+                    },
                     Users: {
                         select: {
                             Name: true,
@@ -137,6 +147,16 @@ router.get("/home/papers/get", async (_req, res) => {
                     },
                 },
                 SubCategory: {
+                    select: {
+                        Name: true,
+                    },
+                },
+                Department: {
+                    select: {
+                        Name: true,
+                    },
+                },
+                Batches: {
                     select: {
                         Name: true,
                     },
@@ -279,6 +299,25 @@ router.get('/home/department/get', async (_req, res) => {
         res.status(500).json({ error: error.message })
     }
 })
+
+router.get(
+    "/home/batches/get",
+    async (_req, res) => {
+        try {
+            const batches = await prisma.batches.findMany({
+                where: {
+                    IsMarkToDelete: false,
+                },
+                orderBy: {
+                    Id: "desc",
+                },
+            });
+            res.json({ data: batches, message: "Batches retrieved successfully" });
+        } catch (error: any) {
+            res.status(500).json({ error: error.message });
+        }
+    },
+);
 
 
 router.get("/author/get/all", async (_req, res) => {
