@@ -147,16 +147,52 @@ router.post(
         DepartmentId,
         BatchId,
       } = req.body;
+
+      const cleanEmail = Email ? Email.trim().toLowerCase() : "";
+      if (!cleanEmail) {
+        res.status(400).json({ message: "Email is required" });
+        return;
+      }
+
+      const existingUser = await prisma.users.findFirst({
+        where: { Email: cleanEmail },
+      });
+
+      if (existingUser) {
+        if (!existingUser.IsMarkToDelete) {
+          res.status(400).json({ message: "Email already exists" });
+          return;
+        } else {
+          const hashedPassword = await bcrypt.hash(Password, 10);
+          const updatedUser = await prisma.users.update({
+            where: { Id: existingUser.Id },
+            data: {
+              RoleId: RoleId ? Number(RoleId) : null,
+              Name,
+              Email: cleanEmail,
+              StudentId,
+              Password: hashedPassword,
+              DepartmentId: DepartmentId ? Number(DepartmentId) : 1,
+              BatchId: BatchId ? Number(BatchId) : null,
+              IsMarkToDelete: false,
+            },
+          });
+          res.status(201).json({ data: updatedUser, message: "User created successfully" });
+          return;
+        }
+      }
+
       const hashedPassword = await bcrypt.hash(Password, 10);
       const newUser = await prisma.users.create({
         data: {
-          RoleId,
+          RoleId: RoleId ? Number(RoleId) : null,
           Name,
-          Email,
+          Email: cleanEmail,
           StudentId,
           Password: hashedPassword,
-          DepartmentId,
-          BatchId,
+          DepartmentId: DepartmentId ? Number(DepartmentId) : 1,
+          BatchId: BatchId ? Number(BatchId) : null,
+          IsMarkToDelete: false,
         },
       });
       res
@@ -172,13 +208,37 @@ router.post("/register", async (req: Request, res: Response) => {
   try {
     const { Name, Email, Password, RoleId, Role } = req.body;
 
-
-    const existingUser = await prisma.users.findUnique({
-      where: { Email },
-    });
-    if (existingUser) {
-      res.status(400).json({ message: "Email already exists" });
+    const cleanEmail = Email ? Email.trim().toLowerCase() : "";
+    if (!cleanEmail) {
+      res.status(400).json({ message: "Email is required" });
       return;
+    }
+
+    const existingUser = await prisma.users.findFirst({
+      where: { Email: cleanEmail },
+    });
+
+    if (existingUser) {
+      if (!existingUser.IsMarkToDelete) {
+        res.status(400).json({ message: "Email already exists" });
+        return;
+      } else {
+        const hashedPassword = await bcrypt.hash(Password, 10);
+        const updatedUser = await prisma.users.update({
+          where: { Id: existingUser.Id },
+          data: {
+            RoleId: RoleId ? Number(RoleId) : (Role ? Number(Role) : 2),
+            Name,
+            Email: cleanEmail,
+            StudentId: '',
+            Password: hashedPassword,
+            DepartmentId: 1,
+            IsMarkToDelete: false,
+          },
+        });
+        res.status(201).json({ data: updatedUser, message: "User created successfully" });
+        return;
+      }
     }
 
     const hashedPassword = await bcrypt.hash(Password, 10);
@@ -186,7 +246,7 @@ router.post("/register", async (req: Request, res: Response) => {
       data: {
         RoleId: RoleId ? Number(RoleId) : (Role ? Number(Role) : 2),
         Name,
-        Email,
+        Email: cleanEmail,
         StudentId: '',
         Password: hashedPassword,
         DepartmentId: 1,
@@ -208,14 +268,40 @@ router.post(
     try {
       const { Name, Email, StudentId, Password, RoleId } = req.body;
       const DepartmentId = Number(req.body.DepartmentId);
-      const BatchId = Number(req.body.BatchId);
+      const BatchId = req.body.BatchId ? Number(req.body.BatchId) : null;
 
-      const existingUser = await prisma.users.findUnique({
-        where: { Email },
-      });
-      if (existingUser) {
-        res.status(400).json({ message: "Email already exists" });
+      const cleanEmail = Email ? Email.trim().toLowerCase() : "";
+      if (!cleanEmail) {
+        res.status(400).json({ message: "Email is required" });
         return;
+      }
+
+      const existingUser = await prisma.users.findFirst({
+        where: { Email: cleanEmail },
+      });
+
+      if (existingUser) {
+        if (!existingUser.IsMarkToDelete) {
+          res.status(400).json({ message: "Email already exists" });
+          return;
+        } else {
+          const hashedPassword = await bcrypt.hash(Password, 10);
+          const updatedUser = await prisma.users.update({
+            where: { Id: existingUser.Id },
+            data: {
+              RoleId: Number(RoleId),
+              Name,
+              Email: cleanEmail,
+              StudentId,
+              Password: hashedPassword,
+              DepartmentId,
+              BatchId,
+              IsMarkToDelete: false,
+            },
+          });
+          res.status(201).json({ data: updatedUser, message: "User created successfully" });
+          return;
+        }
       }
 
       const hashedPassword = await bcrypt.hash(Password, 10);
@@ -223,7 +309,7 @@ router.post(
         data: {
           RoleId: Number(RoleId),
           Name,
-          Email,
+          Email: cleanEmail,
           StudentId,
           Password: hashedPassword,
           DepartmentId,

@@ -12,8 +12,12 @@ const router = express.Router();
 router.post("/login", async (req: Request, res: Response) => {
   try {
     const { Password, Email } = req?.body;
+    const cleanEmail = Email ? Email.trim().toLowerCase() : "";
     const user = await prisma.users.findFirst({
-      where: { Email: Email },
+      where: { 
+        Email: cleanEmail,
+        IsMarkToDelete: false,
+      },
       include: {
         Roles: {
           select: { Name: true },
