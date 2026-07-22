@@ -435,30 +435,56 @@ router.put(
         try {
             const id = Number(req.params.id);
             const { Title, Abstract, CategoryId, SubcategoryId, Name, Authors, Affiliation, Keywords, AuthorDeclaration, Volume, IssueNumber, DOI, Year, FileUrl, ResponseLater } = req.body;
-            const result = await prisma.journals.update({
-                where: {
-                    Id: id,
-                    IsMarkToDelete: false,
-                },
-                data: {
-                    Title,
-                    Abstract,
-                    CategoryId: Number(CategoryId),
-                    SubcategoryId: Number(SubcategoryId),
-                    Name,
-                    Authors,
-                    Affiliation,
-                    Keywords,
-                    AuthorDeclaration,
-                    Volume,
-                    IssueNumber,
-                    DOI,
-                    Year,
-                    ResponseLater,
-                    FileUrl,
-                    UpdatedBy: req.userEmail || "Unknown",
-                },
+            const TeacherIds = req.body.authorsIds || [];
+
+            const result = await prisma.$transaction(async (tx: any) => {
+                const updatedJournal = await tx.journals.update({
+                    where: {
+                        Id: id,
+                        IsMarkToDelete: false,
+                    },
+                    data: {
+                        Title,
+                        Abstract,
+                        CategoryId: Number(CategoryId),
+                        SubcategoryId: SubcategoryId ? Number(SubcategoryId) : null,
+                        Name,
+                        Authors,
+                        Affiliation,
+                        Keywords,
+                        AuthorDeclaration,
+                        Volume,
+                        IssueNumber,
+                        DOI,
+                        Year,
+                        ResponseLater,
+                        FileUrl,
+                        UpdatedBy: req.userEmail || "Unknown",
+                    },
+                });
+
+                if (req.body.authorsIds !== undefined) {
+                    await tx.paperGroups.deleteMany({
+                        where: {
+                            JournalId: id,
+                        },
+                    });
+
+                    for (const teacher of TeacherIds) {
+                        await tx.paperGroups.create({
+                            data: {
+                                JournalId: id,
+                                UserId: Number(teacher),
+                                UserType: GRPConfig.RoleName.Teacher,
+                                CreatedBy: req.userEmail || "Unknown",
+                            },
+                        });
+                    }
+                }
+
+                return updatedJournal;
             });
+
             res.json({
                 data: result,
                 message: "Journal updated successfully",
